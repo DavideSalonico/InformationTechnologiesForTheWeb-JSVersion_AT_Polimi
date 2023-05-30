@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Acquisto</title>
+    <link rel="icon" th:href="@{/img/icon.png}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/auctionOffer.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/purchase.css}">
+</head>
+<body>
+    <div class="col lft-col">
+        <div class="quick-nav">
+            <h3>Rapid Navigation</h3>
+            <ul>
+                <li><a href="#filter-auc">Research Auction</a></li>
+                <li><a href="#available-auc">Available Auctions</a></li>
+                <li><a href="#awarded-art">Won Auctions</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="col mid-col">
+        <div class="row first-row form">
+            <h2 id="filter-auc">Search with a keyword</h2>
+            <form th:action="@{GoToPurchase}" th:method="GET">
+                <div>
+                    <label for="key">Key:</label>
+                    <input type="text" name="key" id="key" required>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="row second-row auc-list" th:if="${key} != null">
+            <h2 id="available-auc" th:text="'Available auction for: ' + ${key}"></h2>
+            <section class="scrollable">
+                <div th:each="entry, rowStat : ${map}" th:class="${rowStat.count % 2 == 0} ? 'odd' : 'even'">
+                    <a th:href="@{GoToAuctionDetails(auctionId=${entry.key}, page ='offer.html')}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="tbl-name">Article name</th>
+                                    <th class="tbl-code">Code</th>
+                                    <th class="tbl-price">Price (&euro;)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="art : ${entry.value}">
+                                <td th:text="${art.name}"></td>
+                                <td th:text="${art.article_id}"></td>
+                                <td><span th:text="${art.price}"></span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${!remainingTimes.isEmpty()}"  th:with=" x =${remainingTimes.get(entry.key)}"
+                           th:text="${'Tempo rimanente: ' + x.getDays() + ' days, ' + x.getHours() + ' hours and ' + x.getMinutes() + ' minutes'}">
+                            Remaining time: x days, x hours and x minutes
+                        </p>
+                    </a>
+                </div>
+            </section>
+        </div>
+        <div class="row third-row offers-list">
+            <h2 id="awarded-art">Won Offers</h2>
+            <section class="scrollable scrll-table" th:if="${winningOffers} != null and not ${winningOffers.isEmpty()}">
+                <div th:each="auction : ${winningOffers.keySet()}">
+                    <h3 th:text="'Maximum Offered for this auction &#x20AC; : '+ ${winningOffers.get(auction).getPrice()}" >Offerta massima </h3>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th class="tbl-name">Article name</th>
+                            <th class="tbl-code">Code</th>
+                            <th class="tbl-price">Price (&euro;)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="article, rowStat : ${awardedAuctions.get(auction)}" th:class="${rowStat.count % 2 == 0} ? 'odd' : 'even'">
+                            <td th:text="${article.name}"></td>
+                            <td th:text="${article.article_id}"></td>
+                            <td><span th:text="${article.price}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="col rgt-col">
+        <div class="quick-nav menu">
+            <h3>Menu</h3>
+            <ul>
+                <li><a th:href="@{/GoToHome}">Home</a></li>
+                <li><a th:href="@{/GoToPurchase}">Purchase</a></li>
+                <li><a th:href="@{/GoToSell}">Sell</a></li>
+                <li><a th:href="@{/Logout}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
