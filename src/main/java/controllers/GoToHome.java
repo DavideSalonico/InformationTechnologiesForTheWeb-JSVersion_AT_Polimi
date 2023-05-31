@@ -1,7 +1,5 @@
 package controllers;
 
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
 import utils.ConnectionHandler;
 
 import javax.servlet.ServletContext;
@@ -20,7 +18,6 @@ public class GoToHome extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	private TemplateEngine templateEngine;
 	
 	public GoToHome() {
 		super();
@@ -29,7 +26,6 @@ public class GoToHome extends HttpServlet {
 	public void init() throws ServletException {
 		ServletContext servletContext = getServletContext();
 
-		templateEngine = utils.EngineHandler.setEngine(servletContext);
 		connection = ConnectionHandler.getConnection(servletContext);
 	}
 	

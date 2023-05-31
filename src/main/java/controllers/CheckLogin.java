@@ -2,8 +2,6 @@ package controllers;
 
 import DAO.UserDAO;
 import beans.User;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
 import utils.ConnectionHandler;
 
 import javax.servlet.ServletContext;
@@ -24,7 +22,6 @@ public class CheckLogin extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	private TemplateEngine templateEngine;
 	private UserDAO userDao;
     
     public CheckLogin() {
@@ -35,7 +32,6 @@ public class CheckLogin extends HttpServlet {
 	public void init() throws ServletException {
 		ServletContext servletContext = getServletContext();
 
-		templateEngine = utils.EngineHandler.setEngine(servletContext);
 		connection = ConnectionHandler.getConnection(servletContext);
 		
 		userDao = new UserDAO(connection);  // Initialize the connection only once, not every doPost()

@@ -1,27 +1,23 @@
 <!DOCTYPE html>
-<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Login</title>
-<link rel="stylesheet" type="text/css" href="css/main.css" th:href="@{/css/main.css}">
-<link rel="stylesheet" type="text/css" href="css/index.css" th:href="@{/css/index.css}">
+	<meta charset="UTF-8">
+	<title>Login</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<script src="utils.js" charset="utf-8" defer></script>
+	<script src="loginManagement.js" charset="utf-8" defer></script>
 </head>
 <body>
 	<div class="col mid-col form lgn-form">
 		<h2>Login</h2>
-		<form action="CheckLogin" method="post">
-			<div>
-				<label for="username">Username:</label> <input type="text"
-					id="username" name="username" min="3" max="20" required>
-			</div>
-			<div>
-				<label for="password">Password:</label> <input type="password"
-					id="password" name="password" min="3" max="20" required>
-			</div>
-			<div th:if="${errorMsg}" class="error-message">
-				<span th:text="${errorMsg}"></span>
-			</div>
-			<button type="submit">Login</button>
+		<form action="#">
+			<fieldset>
+				Username: <input type="text" name="username" required> <br>
+				Password: <input type="password" name="pwd" required><br>
+				<input id="loginbutton" type="button" value="login">
+				<p id="errormessage"></p>
+			</fieldset>
 		</form>
 	</div>
 </body>
