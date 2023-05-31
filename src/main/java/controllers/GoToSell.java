@@ -153,14 +153,14 @@ public class GoToSell extends HttpServlet {
 					
 		String path = "/WEB-INF/sell.html";
 		ServletContext servletContext = getServletContext();
-		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		ctx.setVariable("userOpenAuctions", userOpenAuctions);
-		ctx.setVariable("userClosedAuctions", userClosedAuctions);
-		ctx.setVariable("remainingTimes", remainingTimes);
-		ctx.setVariable("maxOffers", maxOffers);
-		ctx.setVariable("ldt", ldt);
-		ctx.setVariable("articles", articles);
-		ctx.setVariable("articlesSelected", articlesSelected);
-		templateEngine.process(path, ctx, response.getWriter());
+		//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+		//ctx.setVariable("userOpenAuctions", userOpenAuctions);
+		//ctx.setVariable("userClosedAuctions", userClosedAuctions);
+		//ctx.setVariable("remainingTimes", remainingTimes);
+		//ctx.setVariable("maxOffers", maxOffers);
+		//ctx.setVariable("ldt", ldt);
+		//ctx.setVariable("articles", articles);
+		//ctx.setVariable("articlesSelected", articlesSelected);
+		//templateEngine.process(path, ctx, response.getWriter());
     }
 }
