@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="JS" />
         <module name="TIWProject_Jaskaran_Salonico" />
         <module name="TIWProject2022_2023" />
       </profile>
