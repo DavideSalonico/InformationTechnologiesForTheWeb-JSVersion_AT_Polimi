@@ -25,7 +25,7 @@ public class GoToOffer extends HttpServlet {
 	
 	public void init() throws ServletException {
 		ServletContext servletContext = getServletContext();
-		templateEngine = utils.EngineHandler.setEngine(servletContext);
+		//templateEngine = utils.EngineHandler.setEngine(servletContext);
 		connection = ConnectionHandler.getConnection(servletContext);
 		
 		offerDAO = new OfferDAO(connection);
@@ -61,9 +61,9 @@ public class GoToOffer extends HttpServlet {
 		// Redirect to AuctionDetails 
 		String path = "/WEB-INF/offer.html";
 		ServletContext servletContext = getServletContext();
-		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		ctx.setVariable("offer", offer);
-		templateEngine.process(path, ctx, response.getWriter());
+		//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+		//ctx.setVariable("offer", offer);
+		//templateEngine.process(path, ctx, response.getWriter());
 	}
 	
 	public void destroy() {

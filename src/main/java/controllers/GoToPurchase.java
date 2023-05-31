@@ -109,14 +109,14 @@ public class GoToPurchase extends HttpServlet {
 
 		String path = "/WEB-INF/purchase.html";
 		ServletContext servletContext = getServletContext();
-		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		ctx.setVariable("key", key);
-		ctx.setVariable("filteredAuctions", filteredAuctions);
-		ctx.setVariable("awardedAuctions", awardedAuctions);
-		ctx.setVariable("winningOffers", winningOffers);
-		ctx.setVariable("map", map);
-		ctx.setVariable("remainingTimes", remainingTimes);
-		templateEngine.process(path, ctx, response.getWriter());
+		//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+		//ctx.setVariable("key", key);
+		//ctx.setVariable("filteredAuctions", filteredAuctions);
+		//ctx.setVariable("awardedAuctions", awardedAuctions);
+		//ctx.setVariable("winningOffers", winningOffers);
+		//ctx.setVariable("map", map);
+		//ctx.setVariable("remainingTimes", remainingTimes);
+		//templateEngine.process(path, ctx, response.getWriter());
 	}
 
 	private boolean validateKey(String key){

@@ -146,18 +146,18 @@ public class GoToAuctionDetails extends HttpServlet {
 		// Redirect to AuctionDetails 
 		String path = "/WEB-INF/" + page;
 		ServletContext servletContext = getServletContext();
-		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		ctx.setVariable("auctionId", auctionId);
-		ctx.setVariable("auction", auction);
-		ctx.setVariable("article", articles);
-		ctx.setVariable("frmtDeadline", frmtDeadline);
-		ctx.setVariable("isExpired", isExpired);
-		ctx.setVariable("offers", frmtAuctionOffers);
-		ctx.setVariable("users", users);
-		ctx.setVariable("maxAuctionOffer", maxAuctionOffer);
-		ctx.setVariable("awardedUser", awardedUser);
-		ctx.setVariable("imageMap", imageMap);
-		templateEngine.process(path, ctx, response.getWriter());
+		//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+		//ctx.setVariable("auctionId", auctionId);
+		//ctx.setVariable("auction", auction);
+		//ctx.setVariable("article", articles);
+		//ctx.setVariable("frmtDeadline", frmtDeadline);
+		//ctx.setVariable("isExpired", isExpired);
+		//ctx.setVariable("offers", frmtAuctionOffers);
+		//ctx.setVariable("users", users);
+		//ctx.setVariable("maxAuctionOffer", maxAuctionOffer);
+		//ctx.setVariable("awardedUser", awardedUser);
+		//ctx.setVariable("imageMap", imageMap);
+		//templateEngine.process(path, ctx, response.getWriter());
     }
 	
 	public void destroy() {

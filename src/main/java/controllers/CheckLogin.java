@@ -39,8 +39,8 @@ public class CheckLogin extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		WebContext context = new WebContext(request, response, getServletContext(), request.getLocale());
-        templateEngine.process("index", context, response.getWriter());
+		//WebContext context = new WebContext(request, response, getServletContext(), request.getLocale());
+        //templateEngine.process("index", context, response.getWriter());
 	}
 
 
@@ -79,10 +79,10 @@ public class CheckLogin extends HttpServlet {
 		String path;
 		if (user == null) {
 			ServletContext servletContext = getServletContext();
-			final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-			ctx.setVariable("errorMsg", "Incorrect username or password");
+			//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+			//ctx.setVariable("errorMsg", "Incorrect username or password");
 			path = "/index.html";
-			templateEngine.process(path, ctx, response.getWriter());
+			//templateEngine.process(path, ctx, response.getWriter());
 		} else {
 			request.getSession().setAttribute("user", user);
 			request.getSession().setAttribute("creationTime", LocalDateTime.now());

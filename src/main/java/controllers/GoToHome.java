@@ -34,8 +34,8 @@ public class GoToHome extends HttpServlet {
 				// Redirect to the Home page
 				ServletContext servletContext = getServletContext();
 				String path = "/WEB-INF/home.html";
-				final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-				templateEngine.process(path, ctx, response.getWriter());
+				//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+				//templateEngine.process(path, ctx, response.getWriter());
 	}
 	
 	public void destroy() {
