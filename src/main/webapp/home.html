@@ -28,6 +28,250 @@
                 <p>Your privacy is of utmost importance to us. We are committed to protecting and safeguarding your personal information while ensuring a secure and transparent auction experience. Rest assured that any data you provide will be handled in accordance with our strict privacy policy, ensuring confidentiality and respect for your privacy at all times</p>
             </div>
         </section>
+        <div class="row first-row auc-list">
+            <h2 id="open-auc">Open Auctions</h2>
+            <p th:if="${userOpenAuctions.isEmpty()}">No open auction open found, create some new Auctions! </p>
+
+            <!--I call the method showAuction() inside the fragments.html page that will show me all the open auctions because I pass it userOpenAuctions,
+            while the 1 is the parameter that will be used by the method to understand if we are in the open or closed auctions-->
+            <section th:replace="~{WEB-INF/fragments.html :: showAuctions (${userOpenAuctions}, 1)}"></section>
+        </div>
+        <div class="row second-row auc-list">
+            <h2 id="closed-auc">Closed Auctions</h2>
+            <p th:if="${userClosedAuctions.isEmpty()}">There aren't any closed auctions!</p>
+
+            <!-- I call the method showAuction() inside the fragments.html page that will show me all the closed auctions because I pass it userClosedAuctions,
+            while the 0 is the parameter that will be used by the method to understand if we are in the open or closed auctions-->
+            <section th:replace="~{WEB-INF/fragments.html :: showAuctions (${userClosedAuctions}, 0)}"></section>
+        </div>
+        <div class="row third-row form">
+            <h2 id="create-art">CREATE A NEW ARTICLE</h2>
+            <!-- Form that allows the insertion of new articles, it calls the servlet /CreateArticle that will render this page again with the added article -->
+            <form th:method="post" th:action="@{/CreateArticle}" enctype="multipart/form-data">
+
+                <!-- The servlet will receive the parameters sent by the form in its doPost (), which will access them through the "name" identifiers -->
+                <div>
+                    <label for="name">Article's Name:</label>
+                    <input type="text" name="name" id="name" min="4" max="255" required>
+                </div>
+                <div>
+                    <label for="description">Description:</label>
+                    <textarea name="description" id="description" rows="4" cols="50" minlength="10" maxlength="255" placeholder=" ..." spellcheck="false" required></textarea>
+                </div>
+                <div>
+                    <label for="price">Price:</label>
+                    <input type="number" name="price" id="price" min="1" step="1" max="1000000000" required>
+                    <span> &euro;</span>
+                </div>
+                <div>
+                    <label for="image">Select an image:</label>
+                    <input type="file" accept="image/*" name="image" id="image"  required>
+                </div>
+                <button name="article-submit" type="submit">Create Article</button>
+            </form>
+        </div>
+        <div class="row fourth-row form">
+            <h2 id="create-auc">CREATE A NEW AUCTION</h2>
+
+            <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
+            <form th:method="GET" th:action="@{/GoToSell}">
+
+                <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
+                <input type="hidden"  th:each="article : ${articlesSelected}" th:value="${article.article_id}" name="alreadySelected">
+                <div style="display: flex;"> <!-- Flexbox per allign the two divs to insert articles -->
+                    <div style="flex: 1;">
+                        <div th:if="${not articles.isEmpty()}">
+                            <label for="articleSelected">Article</label>
+                            <select name="articleSelected" id="articleSelected" >
+                                <!-- Shows all the articles created by the client not yet assigned to any auction -->
+                                <option th:each="article : ${articles}" th:value="${article.article_id}" th:text="${article.name}"></option>
+                            </select><br/>
+                            <button type="submit">Add to auction</button>
+                        </div>
+                        <div th:unless="${not articles.isEmpty()}">
+                            <!-- Static version of the page -->
+                            <p>First of all, create some new ARTICLES !</p>
+                        </div>
+                    </div>
+
+                    <!-- Box that shows the client which articles he is adding to the auction during creation -->
+                    <div style="flex: 1;" th:if="${!articlesSelected.isEmpty()} ">
+                        <h2>List of Articles selected :</h2>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>NAME</th>
+                                <th>CODE</th>
+                                <th>PRICE</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="article : ${articlesSelected}">
+                                <td th:text="${article.name}"></td>
+                                <td th:text="${article.article_id}"></td>
+                                <td th:text="${article.price}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="flex: 1;" th:unless="${!articlesSelected.isEmpty()}">
+                        <p>NO ARTICLES SELECTED !</p>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Form that triggers the doPost () of the CreateAuction servlet, takes as input all the attributes of an auction and creates it -->
+            <form action="#" th:action="@{/CreateAuction}" method="post" enctype="multipart/form-data">
+                <div>
+                    <label for="minimum_raise"> Minimum Raise:</label>
+                    <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required>
+                    <span> &euro;</span>
+                </div>
+                <div>
+                    <label for="expiring_date">Expiring Date : </label>
+                    <input type="datetime-local" name="expiring_date" id="expiring_date" th:min="${ldt}" placeholder="yyyy-MM-ddTHH:mm" th:value="${ldt}" required>
+                </div>
+
+                <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
+                <input type="hidden"  th:each="article : ${articlesSelected}" th:value="${article.article_id}" name="articlesSelected" >
+                <button type="submit">Create Auction</button>
+            </form>
+        </div>
+        <div class="row first-row form">
+            <h2 id="filter-auc">Search with a keyword</h2>
+            <form th:action="@{GoToPurchase}" th:method="GET">
+                <div>
+                    <label for="key">Key:</label>
+                    <input type="text" name="key" id="key" required>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="row second-row auc-list" th:if="${key} != null">
+            <h2 id="available-auc" th:text="'Available auction for: ' + ${key}"></h2>
+            <section class="scrollable">
+                <div th:each="entry, rowStat : ${map}" th:class="${rowStat.count % 2 == 0} ? 'odd' : 'even'">
+                    <a th:href="@{GoToAuctionDetails(auctionId=${entry.key}, page ='offer.html')}">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th class="tbl-name">Article name</th>
+                                <th class="tbl-code">Code</th>
+                                <th class="tbl-price">Price (&euro;)</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="art : ${entry.value}">
+                                <td th:text="${art.name}"></td>
+                                <td th:text="${art.article_id}"></td>
+                                <td><span th:text="${art.price}"></span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${!remainingTimes.isEmpty()}"  th:with=" x =${remainingTimes.get(entry.key)}"
+                           th:text="${'Tempo rimanente: ' + x.getDays() + ' days, ' + x.getHours() + ' hours and ' + x.getMinutes() + ' minutes'}">
+                            Remaining time: x days, x hours and x minutes
+                        </p>
+                    </a>
+                </div>
+            </section>
+        </div>
+        <div class="row third-row offers-list">
+            <h2 id="awarded-art">Won Offers</h2>
+            <section class="scrollable scrll-table" th:if="${winningOffers} != null and not ${winningOffers.isEmpty()}">
+                <div th:each="auction : ${winningOffers.keySet()}">
+                    <h3 th:text="'Maximum Offered for this auction &#x20AC; : '+ ${winningOffers.get(auction).getPrice()}" >Offerta massima </h3>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th class="tbl-name">Article name</th>
+                            <th class="tbl-code">Code</th>
+                            <th class="tbl-price">Price (&euro;)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="article, rowStat : ${awardedAuctions.get(auction)}" th:class="${rowStat.count % 2 == 0} ? 'odd' : 'even'">
+                            <td th:text="${article.name}"></td>
+                            <td th:text="${article.article_id}"></td>
+                            <td><span th:text="${article.price}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        <div class="row first-row details">
+            <h2 th:if="${auction == null or isExpired}">Informations</h2>
+            <p th:if="${auction == null}">Selected auction does not exists</p>
+            <p th:if="${isExpired}">Auction for selected article is expired</p>
+            <section th:if="${auction != null and not isExpired}">
+                <div th:replace="WEB-INF/fragments.html :: showDetails"></div>
+            </section>
+        </div>
+        <div class="row second-row offers-list" th:if="${auction != null and not isExpired}">
+            <section th:replace="WEB-INF/fragments.html :: showOffers(0)"></section>
+        </div>
+        <div class="row third-row form" th:if="${auction != null and not isExpired}">
+            <h2 id="offr-new">New Offer</h2>
+            <form action="#" th:action="@{/MakeOffer}" method="post">
+                <div>
+                    <label for="offer">Value:</label>
+                    <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" th:min="${min}" th:value="${min}" th:with="min=${not offers.isEmpty()} ? ${maxAuctionOffer.price + auction.minimum_raise} : ${auction.initial_price}" required>
+                    <span>&euro;</span>
+                    <input type="hidden" name="auctionId" th:value="${auction.auction_id}">
+                </div>
+                <button name="offer-submit" type="submit">Confirm</button>
+            </form>
+        </div>
+        <div class="row first-row details">
+            <h2 th:if="${auction == null}">INFORMATIONS</h2>
+            <!--/* The paragraph exists only if the auction is null */-->
+            <p th:if="${auction == null}">User did not create the auction or user does not exists</p>
+            <!--/* th:if="${auction != null}" is used to ensure that the auction exists
+            the section is created along with it's children only if the condition
+            is true */-->
+            <section th:if="${auction != null}">
+                <div th:replace="@{WEB-INF/fragments.html} :: showDetails">
+
+
+                    <!--/* Here a fragment is used, since this piece of markup is identical to
+                    the one used inside offerta.html, it is written once and used twice.
+                    The div is replaced by the fragment's one, along with it's children */-->
+
+                </div>
+
+                <!--/* If the auction is closed but there isn't a maximum offer, it means
+                that there are no offers for this auction */-->
+                <div th:if="${!auction.isOpen() and awardedUser == null}">
+                    <hr>
+                    <h2 id="dtl-info">INFORMATIONS:</h2>
+                    <p>No offers made for this article</p>
+                    <!-- Add a button to close the auction -->
+                </div>
+
+
+                <!--/* If the auction is closed and there is a maximum offer,
+                shows the name of the user who has won the auction, his address and his offer's value */-->
+                <div th:if="${!auction.isOpen() and awardedUser != null}">
+                    <hr>
+                    <h2 id="dtl-infoAwarded">Winner informations</h2>
+                    <p><strong>Name: </strong><span th:text="${awardedUser.username}">name 1</span></p>
+                    <!--/* "#numbers.formatInteger(num, 1, 'POINT')" : formats the number
+                      in order to display it properly. Accepts as parameters the value, the minimum
+                      number of integer digits and the thousands separator */-->
+
+                    <!--/* The euro symbol's html code is not rendered correctly if processed by the thymeleaf engine
+                    So, in order to display it, it's necessary to keep it static. That's why span is used.
+                    Span is also used to make the first word bold */-->
+                    <p><strong>Offer: </strong><span th:text="${#numbers.formatInteger(maxAuctionOffer.price,1,'POINT')}">Offer: offer 1</span> &euro;</p>
+                    <p><strong>Address: </strong><span th:text="${awardedUser.address}">address 1</span></p>
+                </div>
+            </section>
+        </div>
+        <div class="row second-row offers-list" th:remove="${auction == null or !auction.isOpen()} ? all">
+            <section th:replace="@{WEB-INF/fragments.html} :: showOffers(1)">
+            </section>
+        </div>
     </div>
     <div class="col rgt-col">
         <div class="quick-nav menu">
@@ -39,250 +283,6 @@
                 <li><a th:href="@{/Logout}">Logout</a></li>
             </ul>
         </div>
-    </div>
-    <div class="row first-row auc-list">
-        <h2 id="open-auc">Open Auctions</h2>
-        <p th:if="${userOpenAuctions.isEmpty()}">No open auction open found, create some new Auctions! </p>
-
-        <!--I call the method showAuction() inside the fragments.html page that will show me all the open auctions because I pass it userOpenAuctions,
-        while the 1 is the parameter that will be used by the method to understand if we are in the open or closed auctions-->
-        <section th:replace="~{WEB-INF/fragments.html :: showAuctions (${userOpenAuctions}, 1)}"></section>
-    </div>
-    <div class="row second-row auc-list">
-        <h2 id="closed-auc">Closed Auctions</h2>
-        <p th:if="${userClosedAuctions.isEmpty()}">There aren't any closed auctions!</p>
-
-        <!-- I call the method showAuction() inside the fragments.html page that will show me all the closed auctions because I pass it userClosedAuctions,
-        while the 0 is the parameter that will be used by the method to understand if we are in the open or closed auctions-->
-        <section th:replace="~{WEB-INF/fragments.html :: showAuctions (${userClosedAuctions}, 0)}"></section>
-    </div>
-    <div class="row third-row form">
-        <h2 id="create-art">CREATE A NEW ARTICLE</h2>
-        <!-- Form that allows the insertion of new articles, it calls the servlet /CreateArticle that will render this page again with the added article -->
-        <form th:method="post" th:action="@{/CreateArticle}" enctype="multipart/form-data">
-
-            <!-- The servlet will receive the parameters sent by the form in its doPost (), which will access them through the "name" identifiers -->
-            <div>
-                <label for="name">Article's Name:</label>
-                <input type="text" name="name" id="name" min="4" max="255" required>
-            </div>
-            <div>
-                <label for="description">Description:</label>
-                <textarea name="description" id="description" rows="4" cols="50" minlength="10" maxlength="255" placeholder=" ..." spellcheck="false" required></textarea>
-            </div>
-            <div>
-                <label for="price">Price:</label>
-                <input type="number" name="price" id="price" min="1" step="1" max="1000000000" required>
-                <span> &euro;</span>
-            </div>
-            <div>
-                <label for="image">Select an image:</label>
-                <input type="file" accept="image/*" name="image" id="image"  required>
-            </div>
-            <button name="article-submit" type="submit">Create Article</button>
-        </form>
-    </div>
-    <div class="row fourth-row form">
-        <h2 id="create-auc">CREATE A NEW AUCTION</h2>
-
-        <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
-        <form th:method="GET" th:action="@{/GoToSell}">
-
-            <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
-            <input type="hidden"  th:each="article : ${articlesSelected}" th:value="${article.article_id}" name="alreadySelected">
-            <div style="display: flex;"> <!-- Flexbox per allign the two divs to insert articles -->
-                <div style="flex: 1;">
-                    <div th:if="${not articles.isEmpty()}">
-                        <label for="articleSelected">Article</label>
-                        <select name="articleSelected" id="articleSelected" >
-                            <!-- Shows all the articles created by the client not yet assigned to any auction -->
-                            <option th:each="article : ${articles}" th:value="${article.article_id}" th:text="${article.name}"></option>
-                        </select><br/>
-                        <button type="submit">Add to auction</button>
-                    </div>
-                    <div th:unless="${not articles.isEmpty()}">
-                        <!-- Static version of the page -->
-                        <p>First of all, create some new ARTICLES !</p>
-                    </div>
-                </div>
-
-                <!-- Box that shows the client which articles he is adding to the auction during creation -->
-                <div style="flex: 1;" th:if="${!articlesSelected.isEmpty()} ">
-                    <h2>List of Articles selected :</h2>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>NAME</th>
-                            <th>CODE</th>
-                            <th>PRICE</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="article : ${articlesSelected}">
-                            <td th:text="${article.name}"></td>
-                            <td th:text="${article.article_id}"></td>
-                            <td th:text="${article.price}"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div style="flex: 1;" th:unless="${!articlesSelected.isEmpty()}">
-                    <p>NO ARTICLES SELECTED !</p>
-                </div>
-            </div>
-        </form>
-
-        <!-- Form that triggers the doPost () of the CreateAuction servlet, takes as input all the attributes of an auction and creates it -->
-        <form action="#" th:action="@{/CreateAuction}" method="post" enctype="multipart/form-data">
-            <div>
-                <label for="minimum_raise"> Minimum Raise:</label>
-                <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required>
-                <span> &euro;</span>
-            </div>
-            <div>
-                <label for="expiring_date">Expiring Date : </label>
-                <input type="datetime-local" name="expiring_date" id="expiring_date" th:min="${ldt}" placeholder="yyyy-MM-ddTHH:mm" th:value="${ldt}" required>
-            </div>
-
-            <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
-            <input type="hidden"  th:each="article : ${articlesSelected}" th:value="${article.article_id}" name="articlesSelected" >
-            <button type="submit">Create Auction</button>
-        </form>
-    </div>
-    <div class="row first-row form">
-        <h2 id="filter-auc">Search with a keyword</h2>
-        <form th:action="@{GoToPurchase}" th:method="GET">
-            <div>
-                <label for="key">Key:</label>
-                <input type="text" name="key" id="key" required>
-            </div>
-            <button type="submit">Search</button>
-        </form>
-    </div>
-    <div class="row second-row auc-list" th:if="${key} != null">
-        <h2 id="available-auc" th:text="'Available auction for: ' + ${key}"></h2>
-        <section class="scrollable">
-            <div th:each="entry, rowStat : ${map}" th:class="${rowStat.count % 2 == 0} ? 'odd' : 'even'">
-                <a th:href="@{GoToAuctionDetails(auctionId=${entry.key}, page ='offer.html')}">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th class="tbl-name">Article name</th>
-                            <th class="tbl-code">Code</th>
-                            <th class="tbl-price">Price (&euro;)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="art : ${entry.value}">
-                            <td th:text="${art.name}"></td>
-                            <td th:text="${art.article_id}"></td>
-                            <td><span th:text="${art.price}"></span></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <p th:if="${!remainingTimes.isEmpty()}"  th:with=" x =${remainingTimes.get(entry.key)}"
-                       th:text="${'Tempo rimanente: ' + x.getDays() + ' days, ' + x.getHours() + ' hours and ' + x.getMinutes() + ' minutes'}">
-                        Remaining time: x days, x hours and x minutes
-                    </p>
-                </a>
-            </div>
-        </section>
-    </div>
-    <div class="row third-row offers-list">
-        <h2 id="awarded-art">Won Offers</h2>
-        <section class="scrollable scrll-table" th:if="${winningOffers} != null and not ${winningOffers.isEmpty()}">
-            <div th:each="auction : ${winningOffers.keySet()}">
-                <h3 th:text="'Maximum Offered for this auction &#x20AC; : '+ ${winningOffers.get(auction).getPrice()}" >Offerta massima </h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th class="tbl-name">Article name</th>
-                        <th class="tbl-code">Code</th>
-                        <th class="tbl-price">Price (&euro;)</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="article, rowStat : ${awardedAuctions.get(auction)}" th:class="${rowStat.count % 2 == 0} ? 'odd' : 'even'">
-                        <td th:text="${article.name}"></td>
-                        <td th:text="${article.article_id}"></td>
-                        <td><span th:text="${article.price}"></span></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-    <div class="row first-row details">
-        <h2 th:if="${auction == null or isExpired}">Informations</h2>
-        <p th:if="${auction == null}">Selected auction does not exists</p>
-        <p th:if="${isExpired}">Auction for selected article is expired</p>
-        <section th:if="${auction != null and not isExpired}">
-            <div th:replace="WEB-INF/fragments.html :: showDetails"></div>
-        </section>
-    </div>
-    <div class="row second-row offers-list" th:if="${auction != null and not isExpired}">
-        <section th:replace="WEB-INF/fragments.html :: showOffers(0)"></section>
-    </div>
-    <div class="row third-row form" th:if="${auction != null and not isExpired}">
-        <h2 id="offr-new">New Offer</h2>
-        <form action="#" th:action="@{/MakeOffer}" method="post">
-            <div>
-                <label for="offer">Value:</label>
-                <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" th:min="${min}" th:value="${min}" th:with="min=${not offers.isEmpty()} ? ${maxAuctionOffer.price + auction.minimum_raise} : ${auction.initial_price}" required>
-                <span>&euro;</span>
-                <input type="hidden" name="auctionId" th:value="${auction.auction_id}">
-            </div>
-            <button name="offer-submit" type="submit">Confirm</button>
-        </form>
-    </div>
-    <div class="row first-row details">
-        <h2 th:if="${auction == null}">INFORMATIONS</h2>
-        <!--/* The paragraph exists only if the auction is null */-->
-        <p th:if="${auction == null}">User did not create the auction or user does not exists</p>
-        <!--/* th:if="${auction != null}" is used to ensure that the auction exists
-        the section is created along with it's children only if the condition
-        is true */-->
-        <section th:if="${auction != null}">
-            <div th:replace="@{WEB-INF/fragments.html} :: showDetails">
-
-
-                <!--/* Here a fragment is used, since this piece of markup is identical to
-                the one used inside offerta.html, it is written once and used twice.
-                The div is replaced by the fragment's one, along with it's children */-->
-
-            </div>
-
-            <!--/* If the auction is closed but there isn't a maximum offer, it means
-            that there are no offers for this auction */-->
-            <div th:if="${!auction.isOpen() and awardedUser == null}">
-                <hr>
-                <h2 id="dtl-info">INFORMATIONS:</h2>
-                <p>No offers made for this article</p>
-                <!-- Add a button to close the auction -->
-            </div>
-
-
-            <!--/* If the auction is closed and there is a maximum offer,
-            shows the name of the user who has won the auction, his address and his offer's value */-->
-            <div th:if="${!auction.isOpen() and awardedUser != null}">
-                <hr>
-                <h2 id="dtl-infoAwarded">Winner informations</h2>
-                <p><strong>Name: </strong><span th:text="${awardedUser.username}">name 1</span></p>
-                <!--/* "#numbers.formatInteger(num, 1, 'POINT')" : formats the number
-      			in order to display it properly. Accepts as parameters the value, the minimum
-      			number of integer digits and the thousands separator */-->
-
-                <!--/* The euro symbol's html code is not rendered correctly if processed by the thymeleaf engine
-                So, in order to display it, it's necessary to keep it static. That's why span is used.
-                Span is also used to make the first word bold */-->
-                <p><strong>Offer: </strong><span th:text="${#numbers.formatInteger(maxAuctionOffer.price,1,'POINT')}">Offer: offer 1</span> &euro;</p>
-                <p><strong>Address: </strong><span th:text="${awardedUser.address}">address 1</span></p>
-            </div>
-        </section>
-    </div>
-    <div class="row second-row offers-list" th:remove="${auction == null or !auction.isOpen()} ? all">
-        <section th:replace="@{WEB-INF/fragments.html} :: showOffers(1)">
-        </section>
     </div>
 </body>
 </html>
