@@ -8,8 +8,6 @@ import beans.Article;
 import beans.Auction;
 import beans.Offer;
 import beans.User;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
 import utils.ConnectionHandler;
 
 import javax.servlet.ServletContext;
@@ -32,7 +30,6 @@ public class GoToAuctionDetails extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	private TemplateEngine templateEngine;
 
 	private OfferDAO offerDAO;
 	private AuctionDAO auctionDAO;
@@ -41,8 +38,6 @@ public class GoToAuctionDetails extends HttpServlet {
 	
 	public void init() throws ServletException {
 		ServletContext servletContext = getServletContext();
-
-		templateEngine = utils.EngineHandler.setEngine(servletContext);
 		connection = ConnectionHandler.getConnection(servletContext);
 
 		offerDAO = new OfferDAO(connection);

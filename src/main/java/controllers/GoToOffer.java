@@ -2,8 +2,6 @@ package controllers;
 
 import DAO.OfferDAO;
 import beans.Offer;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
 import utils.ConnectionHandler;
 
 import javax.servlet.ServletContext;
@@ -22,7 +20,6 @@ public class GoToOffer extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	private TemplateEngine templateEngine;
 
 	private OfferDAO offerDAO;
 	
