@@ -1,6 +1,7 @@
 {
     //page components
-    let openAuctions, closedAuctions, searchForm, articleInserter, auctionCreator
+    let openAuctions, closedAuctions, articleCreator, auctionCreator, searchForm, searchedAuctions,
+        wonOffers, informations, offerCreator;
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -12,11 +13,20 @@
         }
     }, false);
 
+    // Constructors of view components
+
+    function PersonalMessage(_username, messagecontainer){
+        this.username = _username;
+        this.show = function(){
+            messagecontainer.textContent = this.username;
+        }
+    }
+
     function PageOrchestrator() {
         var alertContainer = document.getElementById("id_alert");
 
         this.start = function() {
-            personalMessage = new PersonalMessage(sessionStorage.getItem('username'),
+            let personalMessage = new PersonalMessage(sessionStorage.getItem('username'),
                 document.getElementById("id_username"));
             personalMessage.show();
 
