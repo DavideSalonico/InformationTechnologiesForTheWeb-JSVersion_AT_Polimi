@@ -17,7 +17,8 @@
 <body>
     <div class="col mid-col introduction">
         <div id="id_alert"></div>
-        <section class="overview" id="id_loginBanner">
+
+        <section id="id_loginBanner" class="overview" >
             <div>
                 <h2>Online Auctions!</h2>
                 <p id="id_username">Welcome back </p>
@@ -27,7 +28,91 @@
                 <p>Your privacy is of utmost importance to us. We are committed to protecting and safeguarding your personal information while ensuring a secure and transparent auction experience. Rest assured that any data you provide will be handled in accordance with our strict privacy policy, ensuring confidentiality and respect for your privacy at all times</p>
             </div>
         </section>
-        <div id="id_openAuctionList"></div>
+
+        <div class="id_sellPage">
+            <!-- ASTE APERTE -->
+            <div id="openAuctions" class="row first-row auc-list"  >
+                <h2 id="open-auc">Open Auctions</h2>
+                <section id="id_openAuctions">
+                    <p>No open auctions found, create some new Auctions! </p>
+                    <section class="scrollable" >
+                        <a>
+                            <table class="dtl-offers">
+                                <thead>
+                                <tr>
+                                    <th>Article Name</th>
+                                    <th>Code</th>
+                                    <th>Price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Table Content-->
+                                </tbody>
+                            </table>
+                            <p>
+                                <span></span> &euro;
+                            </p>
+                            <!-- PUT Offerte massima e Remaining Times by Script-->
+                        </a>
+                    </section>
+                </section>
+            </div>
+            <!-- ASTE CHIUSE -->
+            <div id="closeAuctions"  class="row second-row auc-list" >
+                <h2 id="closed-auc">Closed Auctions</h2>
+                <section id="id_closeAuctions">
+                    <p>No closed auctions found, create some new Auctions! </p>
+                    <section class="scrollable" >
+                        <a>
+                            <table class="dtl-offers">
+                                <thead>
+                                <tr>
+                                    <th>Article Name</th>
+                                    <th>Code</th>
+                                    <th>Price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Table Content-->
+                                </tbody>
+                            </table>
+                            <p>
+                                <span></span> &euro;
+                            </p>
+                            <!-- PUT Offerte massima e Remaining Times by Script-->
+                        </a>
+                    </section>
+                </section>
+            </div>
+            <!-- CREATE ARTICLE -->
+            <div class="row third-row form" id="createArticle">
+                <h2 id="create-art">CREATE A NEW ARTICLE</h2>
+                <form method="post" action="@{/CreateArticle}" enctype="multipart/form-data">
+                    <div>
+                        <label for="name">Article's Name:</label>
+                        <input type="text" name="name" id="name" min="4" max="255" required>
+                    </div>
+                    <div>
+                        <label for="description">Description:</label>
+                        <textarea name="description" id="description" rows="4" cols="50" minlength="10" maxlength="255" placeholder=" ..." spellcheck="false" required></textarea>
+                    </div>
+                    <div>
+                        <label for="price">Price:</label>
+                        <input type="number" name="price" id="price" min="1" step="1" max="1000000000" required>
+                        <span> &euro;</span>
+                    </div>
+                    <div>
+                        <label for="image">Select an image:</label>
+                        <input type="file" accept="image/*" name="image" id="image"  required>
+                    </div>
+                    <button name="article-submit" type="submit">Create Article</button>
+                </form>
+            </div>
+            <!-- CREATE AUCTION -->
+
+        </div>
+
+
     </div>
     <div class="col rgt-col">
         <div class="quick-nav menu">

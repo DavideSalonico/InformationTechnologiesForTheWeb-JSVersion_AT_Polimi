@@ -31,6 +31,23 @@
         };
     }
 
+    function SellPage(_username, _sellcontainer, _openAuctions, _closedAuctions, _createArticle, _createAuction){
+        this.username = _username;
+        this.sellcontainer = _sellcontainer;
+        this.openAuctions = _openAuctions;
+        this.closedAuctions = _closedAuctions;
+        this.createArticle = _createArticle;
+        this.createAuction = _createAuction;
+
+        this.reset = function(){
+            this.sellcontainer.style.visibility = "hidden";
+        };
+
+        this.show = function(){
+            this.sellcontainer.style.visibility = "visible";
+        };
+    }
+
     function Menu(_home, _purchase, _sell, _logout){
         this.home = _home;
         this.purchase = _purchase;
