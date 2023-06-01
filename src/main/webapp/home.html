@@ -11,15 +11,16 @@
     <link rel="stylesheet" type="text/css" href="css/auctionDetails.css">
     <link rel="stylesheet" type="text/css" href="css/offer.css">
     <link rel="stylesheet" type="text/css" href="css/dettagli.css">
+    <script src="utils.js" charset="utf-8" defer></script>
+    <script src="onlineAuctions.js" charset="utf-8" defer></script>
 </head>
 <body>
-    <div class="col lft-col"></div>
     <div class="col mid-col introduction">
         <div id="id_alert"></div>
-        <section class="overview">
+        <section class="overview" id="id_loginBanner">
             <div>
                 <h2>Online Auctions!</h2>
-                <p>Welcome back </p><p id="id_username"></p>
+                <p id="id_username">Welcome back </p>
                 <p><strong>
                     Welcome to our online auction page, where treasures await and bidding is an adventure. Explore our curated selection of unique items from around the world, spanning art, antiques, jewelry, and more. Join the excitement, place your bids, and discover extraordinary pieces that will capture your heart. Happy bidding!</strong></p>
                 <h2>Privacy Policy</h2>
@@ -31,10 +32,10 @@
         <div class="quick-nav menu">
             <h3>Menu</h3>
             <ul>
-                <li><a>Home</a></li>
-                <li><a>Purchase</a></li>
-                <li><a>Sell</a></li>
-                <li><a>Logout</a></li>
+                <li><a id="home_anchor">Home</a></li>
+                <li><a id="purchase_anchor">Purchase</a></li>
+                <li><a id="sell_anchor">Sell</a></li>
+                <li><a id="logout_anchor">Logout</a></li>
             </ul>
         </div>
     </div>

@@ -1,7 +1,8 @@
 {
     //page components
-    let openAuctions, closedAuctions, articleCreator, auctionCreator, searchForm, searchedAuctions,
-        wonOffers, informations, offerCreator;
+    let loginBanner, menu;
+    let alertContainer = document.getElementById("id_alert");
+
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -15,28 +16,74 @@
 
     // Constructors of view components
 
-    function PersonalMessage(_username, messagecontainer){
+    function LoginBanner(_username, _bannercontainer, _messagecontainer){
         this.username = _username;
+        this.bannercontainer = _bannercontainer;
+        this.messagecontainer = _messagecontainer;
+
+        this.reset = function(){
+            this.bannercontainer.style.visibility = "hidden";
+        };
+
         this.show = function(){
-            messagecontainer.textContent = this.username;
+            this.messagecontainer.textContent = "Welcome back " + _username;
+            this.bannercontainer.style.visibility = "visible";
+        };
+    }
+
+    function Menu(_home, _purchase, _sell, _logout){
+        this.home = _home;
+        this.purchase = _purchase;
+        this.sell = _sell;
+        this.logout = _logout;
+
+        this.registerEvents = function(orchestrator){
+            this.home.addEventListener('click', () => {
+                orchestrator.refresh();
+            }, false);
+
+            this.purchase.addEventListener('click', () => {
+                orchestrator.renderPurchase();
+            }, false);
+
+            this.sell.addEventListener('click', () => {
+                orchestrator.renderSell();
+            }, false);
+
+            this.logout.addEventListener('click', () => {
+                window.sessionStorage.removeItem('username');
+                window.location.href = "home.html";
+            }, false);
         }
     }
 
     function PageOrchestrator() {
-        var alertContainer = document.getElementById("id_alert");
+        let alertContainer = document.getElementById("id_alert");
 
         this.start = function() {
-            let personalMessage = new PersonalMessage(sessionStorage.getItem('username'), document.getElementById("id_username"));
-            personalMessage.show();
+            menu = new Menu(document.getElementById("home_anchor"),
+                document.getElementById("purchase_anchor"),
+                document.getElementById("sell_anchor"),
+                document.getElementById("logout_anchor"));
+            menu.registerEvents(this);
 
-        this.refresh = function(currentMission) { // currentMission initially null at start
-            alertContainer.textContent = "";        // not null after creation of status change
-            missionsList.reset();
-            missionDetails.reset();
-            missionsList.show(function() {
-                missionsList.autoclick(currentMission);
-            }); // closure preserves visibility of this
-            wizard.reset();
+            loginBanner = new LoginBanner(sessionStorage.getItem("username"),
+                document.getElementById("id_loginBanner"),
+                document.getElementById("id_username"));
+            loginBanner.show();
+        };
+
+        this.refresh = function(){
+            alertContainer.textContent = "";
+            loginBanner.show();
+        };
+
+        this.renderPurchase = function(){
+            loginBanner.reset();
+        };
+
+        this.renderSell = function(){
+            loginBanner.reset();
         };
     }
 }
