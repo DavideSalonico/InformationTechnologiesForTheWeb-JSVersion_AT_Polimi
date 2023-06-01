@@ -109,23 +109,85 @@
                 </form>
             </div>
             <!-- CREATE AUCTION -->
+            <div class="row fourth-row form">
+                <h2 id="create-auc">CREATE A NEW AUCTION</h2>
 
+                <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
+                <form method="GET" action="@{/GoToSell}">
+
+                    <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
+                    <input type="hidden"  each="article : ${articlesSelected}" value="${article.article_id}" name="alreadySelected">
+                    <div style="display: flex;"> <!-- Flexbox per allign the two divs to insert articles -->
+                        <div style="flex: 1;">
+                            <div if="${not articles.isEmpty()}">
+                                <label for="articleSelected">Article</label>
+                                <select name="articleSelected" id="articleSelected" >
+                                    <!-- Shows all the articles created by the client not yet assigned to any auction -->
+                                    <option each="article : ${articles}" value="${article.article_id}" text="${article.name}"></option>
+                                </select><br/>
+                                <button type="submit">Add to auction</button>
+                            </div>
+                            <div unless="${not articles.isEmpty()}">
+                                <!-- Static version of the page -->
+                                <p>First of all, create some new ARTICLES !</p>
+                            </div>
+                        </div>
+
+                        <!-- Box that shows the client which articles he is adding to the auction during creation -->
+                        <div style="flex: 1;" if="${!articlesSelected.isEmpty()} ">
+                            <h2>List of Articles selected :</h2>
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>NAME</th>
+                                    <th>CODE</th>
+                                    <th>PRICE</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Table Content-->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="flex: 1;" unless="${!articlesSelected.isEmpty()}">
+                            <p>NO ARTICLES SELECTED !</p>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Form that triggers the doPost () of the CreateAuction servlet, takes as input all the attributes of an auction and creates it -->
+                <form action="#" action="@{/CreateAuction}" method="post" enctype="multipart/form-data">
+                    <div>
+                        <label for="minimum_raise"> Minimum Raise:</label>
+                        <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required>
+                        <span> &euro;</span>
+                    </div>
+                    <div>
+                        <label for="expiring_date">Expiring Date : </label>
+                        <input type="datetime-local" name="expiring_date" id="expiring_date" min="${ldt}" placeholder="yyyy-MM-ddTHH:mm" value="${ldt}" required>
+                    </div>
+
+                    <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
+                    <input type="hidden"  each="article : ${articlesSelected}" value="${article.article_id}" name="articlesSelected" >
+                    <button type="submit">Create Auction</button>
+                </form>
+            </div>
         </div>
 
 
         <!-- Page PURCHASE -->
         <div class="id_purchasePage">
-            <div class="col mid-col">
+            <div>
 
                 <!-- SEARCH FORM -->
                 <div class="row first-row form">
                     <h2>Search with a keyword</h2>
-                    <form action="@{GoToPurchase}" method="GET">
+                    <form   action="@{GoToPurchase}" method="GET">
                         <div>
                             <label for="key">Key:</label>
                             <input type="text" name="key" id="key" required>
                         </div>
-                        <button type="submit">Search</button>
+                        <button id="id_searchButton"  type="submit">Search</button>
                     </form>
                 </div>
 
@@ -133,24 +195,8 @@
                 <div id="availableAuctions"  class="row second-row auc-list" >
                     <h2 id="available-auc" text="Available auction for: "></h2>
                     <section class="scrollable">
-                        <div>
-                            <a href="@{GoToAuctionDetails(auctionId=${entry.key}, page ='offer.html')}">
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th class="tbl-name">Article name</th>
-                                        <th class="tbl-code">Code</th>
-                                        <th class="tbl-price">Price (&euro;)</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="searchedTableBody">
-                                        <!-- Table Content-->
-                                    </tbody>
-                                </table>
-                                <p >
-                                    <!-- Remaining Times by Script-->
-                                </p>
-                            </a>
+                        <div id="id_searchedAuctions">
+                            <!-- DYNAMIC SEARCHED AUCTIONS, clickable to AuctionDetails-->
                         </div>
                     </section>
                 </div>
@@ -180,7 +226,7 @@
         </div>
 
         <!-- Page AUCTIONDETAILS -->
-        <div id="id_auctionDetails"  class="col mid-col">
+        <div id="id_auctionDetails" >
             <div class="row first-row details">
                 <h2 if="${auction == null}">INFORMATIONS</h2>
                 <p if="${auction == null}">User did not create the auction or user does not exists</p>
@@ -252,6 +298,79 @@
                     </a>
 
                 </section>
+            </div>
+        </div>
+
+        <!-- Page OFFER -->
+        <div id="id_offer" >
+            <div>
+
+                <!-- INFO ABOUT AUCTION (articles etc) -->
+                <div class="row first-row details">
+                    <h2 if="${auction == null or isExpired}">Informations</h2>
+                    <p if="${auction == null}">Selected auction does not exists</p>
+                    <p if="${isExpired}">Auction for selected article is expired</p>
+                    <section if="${auction != null and not isExpired}">
+                        <div>
+                            <h2>List of Articles contained by auction</h2>
+                            <block th:if="${not article.isEmpty()}">
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                        <th>Image</th>
+                                        <th>Description</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!--TABLE BODY-->
+                                    </tbody>
+                                </table>
+                            </block>
+                            <p unless="${not article.isEmpty()}">Nessun articolo disponibile</p>
+                            <!--INFO about auction(price, raise, expiring)-->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- LIST OF OFFERS -->
+                <div class="row second-row offers-list" if="${auction != null and not isExpired}">
+                    <section class="mid-col scrollable" >
+                        <h2 >OFFERS</h2>
+                        <p if="${offers == null or offers.isEmpty()}">Non esiste alcuna offerta al momento!</p>
+                        <table remove="${offers == null or offers.isEmpty()} ? all">
+                            <thead>
+                            <tr>
+                                <th class="tbl-val tbl-name">Nome</th>
+                                <th class="tbl-val tbl-offer">Offerta (&euro;)</th>
+                                <th class="tbl-val tbl-date">Data</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <!-- LIST OF OFFERS-->
+                            </tr>
+                            </tbody>
+                        </table>
+                        <a class="button-link" href="#" if="${details == 1 and !isExpired }" href="@{CloseAuction(auctionId= ${auction.auction_id})}">
+                            <button>Close auction</button>
+                        </a>
+                    </section>
+                </div>
+
+                <!-- FORM FOR OFFER -->
+                <div id="offerForm"class="row third-row form" >
+                    <h2>New Offer</h2>
+                    <form action="#" action="@{/MakeOffer}" method="post">
+                        <div>
+                            <label for="offer">Value:</label>
+                            <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" min="${min}" value="${min}" with="min=${not offers.isEmpty()} ? ${maxAuctionOffer.price + auction.minimum_raise} : ${auction.initial_price}" required>
+                            <span>&euro;</span>
+                            <input type="hidden" name="auctionId" value="${auction.auction_id}">
+                        </div>
+                        <button name="offer-submit" type="submit">Confirm</button>
+                    </form>
+                </div>
             </div>
         </div>
 
