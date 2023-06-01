@@ -1,6 +1,6 @@
 {
     //page components
-    let loginBanner, menu;
+    let loginBanner, menu, searchForm;
     let alertContainer = document.getElementById("id_alert");
 
     pageOrchestrator = new PageOrchestrator();
@@ -74,6 +74,107 @@
         }
     }
 
+    function SearchForm(_searchButton, _searchedAuctionsContainerDiv){
+        this.searchButton = _searchButton;
+        this.searchContainer = this.searchButton.closest("form");
+        this.searchedAuctionsContainerDiv = _searchedAuctionsContainerDiv;
+
+        this.reset = function(){
+            let self = this
+            self.searchContainer.style.visibility = "hidden";
+        }
+
+        this.show = function(){
+            let self = this;
+            self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
+            self.searchContainer.style.visibility = "visible";
+        }
+
+        this.registerEvents = function(){
+            this.searchButton.addEventListener('click', (e) => {
+                let form = e.target.closest("form");
+                if(form.checkValidity()){
+                    let self = this;
+                    let keyword = form.querySelector("input").value;
+                    makeCall("GET", 'GoToPurchase', keyword,
+                        function(req){
+                        if(req.readyState === 4){
+                            let message = req.responseText;
+                            if(req.status === 200){
+                                let searchedAuctions = JSON.parse(req.responseText);
+                                self.searchedAuctionContainer.update(searchedAuctions);
+                                self.reset();
+                            }
+                            else if(req.status === 403){
+                                window.location.href = req.getResponseHeader("Location"); //TODO: ???
+                                window.sessionStorage.removeItem('username');
+                            }
+                            else{
+                                self.alert.textContent = message;
+                            }
+                        }
+                    })
+                }
+                else{
+                    form.reportValidity();
+                }
+            });
+        };
+    }
+
+    function SearchedAuctionContainer(_searchedAuctionsDiv){
+        this.searchedAuctionsDiv = _searchedAuctionsDiv;
+
+        this.reset = function(){
+            this.searchedAuctionsDiv.style.visibility = "hidden";
+            this.searchedAuctionsDiv.innerHTML = "";
+        }
+
+        this.update = function(auctionList){
+            let self = this;
+            auctionList.forEach(function(auction){
+                let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead;
+                anchor = document.createElement("a");
+                anchor.href = "#";
+                table = document.createElement("table");
+                thead = document.createElement("thead");
+                hrow = document.createElement("tr");
+                namehead = document.createElement("td");
+                namehead.textContent = "Name";
+                hrow.appendChild(namehead);
+                codehead = document.createElement("td");
+                codehead.textContent = "Code";
+                hrow.appendChild(codehead);
+                pricehead = document.createElement("td");
+                pricehead.textContent = "Price";
+                hrow.appendChild(pricehead);
+                thead.appendChild(hrow);
+                table.appendChild(thead);
+                tbody = document.createElement("tbody");
+                let row, namecell, codecell, pricecell, par;
+                auction.articles.forEach(function(article){
+                    row.document.createElement("tr");
+                    namecell = document.createElement("td");
+                    namecell.textContent = article.name;
+                    row.appendChild(namecell);
+                    codecell = document.createElement("td");
+                    codecell.textContent = article.code;
+                    row.appendChild(codecell);
+                    pricecell = document.createElement("td");
+                    pricecell.textContent = article.price;
+                    row.appendChild(pricecell);
+                    tbody.appendChild(row);
+                })
+                table.appendChild(tbody);
+                par = document.createElement("p");
+                par.textContent = "Maximum offer: " + auction.maxOffer;
+                anchor.appendChild(table);
+                anchor.appendChild(par);
+                self.searchedAuctionsDiv.appendChild(anchor);
+            });
+        }
+    }
+
     function PageOrchestrator() {
         alertContainer = document.getElementById("id_alert");
 
@@ -88,19 +189,28 @@
                 document.getElementById("id_loginBanner"),
                 document.getElementById("id_username"));
             loginBanner.show();
+
+            searchForm = new SearchForm(document.getElementById("id_searchButton"), document.getElementById("id_searchedAuctions"));
+            searchForm.show();
+            searchForm.registerEvents(this);
         };
 
         this.refresh = function(){
             alertContainer.textContent = "";
             loginBanner.show();
+            searchForm.reset();
+            searchForm.searchContainer.reset();
         };
 
         this.renderPurchase = function(){
             loginBanner.reset();
+            searchForm.show();
         };
 
         this.renderSell = function(){
             loginBanner.reset();
+            searchForm.reset();
+            searchForm.searchContainer.reset();
         };
     }
 }
