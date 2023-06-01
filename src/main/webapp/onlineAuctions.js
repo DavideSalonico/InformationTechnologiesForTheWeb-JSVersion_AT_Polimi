@@ -22,12 +22,12 @@
         this.messagecontainer = _messagecontainer;
 
         this.reset = function(){
-            this.bannercontainer.style.visibility = "hidden";
+            this.bannercontainer.style.display = "none";
         };
 
         this.show = function(){
             this.messagecontainer.textContent = "Welcome back " + _username;
-            this.bannercontainer.style.visibility = "visible";
+            this.bannercontainer.style.display = "block";
         };
     }
 
@@ -40,11 +40,11 @@
         this.createAuction = _createAuction;
 
         this.reset = function(){
-            this.sellcontainer.style.visibility = "hidden";
+            this.sellcontainer.style.display = "none";
         };
 
         this.show = function(){
-            this.sellcontainer.style.visibility = "visible";
+            this.sellcontainer.style.display = "block";
         };
     }
 
@@ -81,13 +81,13 @@
 
         this.reset = function(){
             let self = this
-            self.searchContainer.style.visibility = "hidden";
+            self.searchContainer.style.display = "none";
         }
 
         this.show = function(){
             let self = this;
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
-            self.searchContainer.style.visibility = "visible";
+            self.searchContainer.style.display = "block";
         }
 
         this.registerEvents = function(){
@@ -126,7 +126,7 @@
         this.searchedAuctionsDiv = _searchedAuctionsDiv;
 
         this.reset = function(){
-            this.searchedAuctionsDiv.style.visibility = "hidden";
+            this.searchedAuctionsDiv.style.display = "none";
             this.searchedAuctionsDiv.innerHTML = "";
         }
 
