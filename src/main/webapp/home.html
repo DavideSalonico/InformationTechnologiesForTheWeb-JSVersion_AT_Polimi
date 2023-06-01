@@ -31,9 +31,9 @@
 
         <div class="id_sellPage">
             <!-- ASTE APERTE -->
-            <div id="openAuctions" class="row first-row auc-list"  >
-                <h2 id="open-auc">Open Auctions</h2>
-                <section id="id_openAuctions">
+            <div class="row first-row auc-list"  >
+                <h2>Open Auctions</h2>
+                <section id="openAuctions">
                     <p>No open auctions found, create some new Auctions! </p>
                     <section class="scrollable" >
                         <a>
@@ -58,9 +58,9 @@
                 </section>
             </div>
             <!-- ASTE CHIUSE -->
-            <div id="closeAuctions"  class="row second-row auc-list" >
-                <h2 id="closed-auc">Closed Auctions</h2>
-                <section id="id_closeAuctions">
+            <div class="row second-row auc-list" >
+                <h2>Closed Auctions</h2>
+                <section id="closeAuctions">
                     <p>No closed auctions found, create some new Auctions! </p>
                     <section class="scrollable" >
                         <a>
@@ -85,8 +85,8 @@
                 </section>
             </div>
             <!-- CREATE ARTICLE -->
-            <div class="row third-row form" id="createArticle">
-                <h2 id="create-art">CREATE A NEW ARTICLE</h2>
+            <div id="createArticle" class="row third-row form">
+                <h2>CREATE A NEW ARTICLE</h2>
                 <form method="post" action="@{/CreateArticle}" enctype="multipart/form-data">
                     <div>
                         <label for="name">Article's Name:</label>
@@ -113,16 +113,159 @@
         </div>
 
 
-    </div>
-    <div class="col rgt-col">
-        <div class="quick-nav menu">
-            <h3>Menu</h3>
-            <ul>
-                <a id="home_anchor"><li>Home</li></a>
-                <a id="purchase_anchor"><li>Purchase</li></a>
-                <a id="sell_anchor"><li>Sell</li></a>
-                <a id="logout_anchor"><li>Logout</li></a>
-            </ul>
+        <!-- Page PURCHASE -->
+        <div class="id_purchasePage">
+            <div class="col mid-col">
+
+                <!-- SEARCH FORM -->
+                <div class="row first-row form">
+                    <h2>Search with a keyword</h2>
+                    <form action="@{GoToPurchase}" method="GET">
+                        <div>
+                            <label for="key">Key:</label>
+                            <input type="text" name="key" id="key" required>
+                        </div>
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
+                <!-- SEARCHED AUCTIONS -->
+                <div id="availableAuctions"  class="row second-row auc-list" >
+                    <h2 id="available-auc" text="Available auction for: "></h2>
+                    <section class="scrollable">
+                        <div>
+                            <a href="@{GoToAuctionDetails(auctionId=${entry.key}, page ='offer.html')}">
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th class="tbl-name">Article name</th>
+                                        <th class="tbl-code">Code</th>
+                                        <th class="tbl-price">Price (&euro;)</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="searchedTableBody">
+                                        <!-- Table Content-->
+                                    </tbody>
+                                </table>
+                                <p >
+                                    <!-- Remaining Times by Script-->
+                                </p>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- WON OFFERS -->
+                <div id="wonOffers"  class="row third-row offers-list">
+                    <h2>Won Offers</h2>
+                    <section class="scrollable scrll-table" if="${winningOffers} != null and not ${winningOffers.isEmpty()}">
+                        <div each="auction : ${winningOffers.keySet()}">
+                            <h3 text="'Maximum Offered for this auction &#x20AC; : '+ ${winningOffers.get(auction).getPrice()}" >Offerta massima </h3>
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="tbl-name">Article name</th>
+                                    <th class="tbl-code">Code</th>
+                                    <th class="tbl-price">Price (&euro;)</th>
+                                </tr>
+                                </thead>
+                                <tbody >
+                                    <!--EACH ARTICLE CONTENT, for every AUCTION -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page AUCTIONDETAILS -->
+        <div id="id_auctionDetails"  class="col mid-col">
+            <div class="row first-row details">
+                <h2 if="${auction == null}">INFORMATIONS</h2>
+                <p if="${auction == null}">User did not create the auction or user does not exists</p>
+
+                <!-- LIST OF ARTICLES -->
+                <section if="${auction != null}">
+                    <div >
+                        <h2 id="dtl-articles">List of Articles contained by auction</h2>
+                        <block if="${not article.isEmpty()}">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Image</th>
+                                    <th>Description</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr each="item : ${article}">
+                                        <!-- Article Content-->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </block>
+                        <p id="noArticleAvailable">Nessun articolo disponibile</p>
+                        <!--INFO about auction-->
+                        <p><strong>Prezzo iniziale: </strong> &euro;</p>
+                        <p><strong>Rialzo minimo: </strong> &euro;</p>
+                        <p><strong>Scadenza: </strong></p>
+                    </div>
+
+                    <div if="${!auction.isOpen() and awardedUser == null}">
+                        <hr>
+                        <h2 id="dtl-info">INFORMATIONS:</h2>
+                        <p>No offers made for this article</p>
+                        <!-- Add a button to close the auction -->
+                    </div>
+
+                    <div id=""if="${!auction.isOpen() and awardedUser != null}">
+                        <hr>
+                        <h2 id="dtl-infoAwarded">Winner informations</h2>
+                        <p><strong>Name: </strong><span text="${awardedUser.username}">name 1</span></p>
+                        <p><strong>Offer: </strong><span text="${#numbers.formatInteger(maxAuctionOffer.price,1,'POINT')}">Offer: offer 1</span> &euro;</p>
+                        <p><strong>Address: </strong><span text="${awardedUser.address}">address 1</span></p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- LIST OF OFFERS -->
+            <div class="row second-row offers-list" remove="${auction == null or !auction.isOpen()} ? all">
+                <section class="mid-col scrollable">
+                    <h2 id="dtl-offers">OFFERS</h2>
+                    <p if="${offers == null or offers.isEmpty()}">Non esiste alcuna offerta al momento!</p>
+                    <table remove="${offers == null or offers.isEmpty()} ? all">
+                        <thead>
+                        <tr>
+                            <th class="tbl-val tbl-name">Nome</th>
+                            <th class="tbl-val tbl-offer">Offerta (&euro;)</th>
+                            <th class="tbl-val tbl-date">Data</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <!-- LIST OF OFFERS-->
+                        </tbody>
+                    </table>
+                    <a class="button-link" href="#" if="${details == 1 and !isExpired }" href="@{CloseAuction(auctionId= ${auction.auction_id})}">
+                        <button>Close auction</button>
+                    </a>
+
+                </section>
+            </div>
+        </div>
+
+        <!-- NAVIGATION THROUGH PAGES-->
+        <div class="col rgt-col">
+            <div class="quick-nav menu">
+                <h3>Menu</h3>
+                <ul>
+                    <a id="home_anchor"><li>Home</li></a>
+                    <a id="purchase_anchor"><li>Purchase</li></a>
+                    <a id="sell_anchor"><li>Sell</li></a>
+                    <a id="logout_anchor"><li>Logout</li></a>
+                </ul>
+            </div>
         </div>
     </div>
 </body>
