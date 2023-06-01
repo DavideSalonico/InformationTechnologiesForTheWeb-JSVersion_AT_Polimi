@@ -17,9 +17,6 @@
     <div class="col mid-col introduction">
         <section class="overview">
             <div>
-                <a>Login</a>
-            </div>
-            <div>
                 <h2>Online Auctions!</h2>
                 <p>Welcome back </p><p id="id_username"></p>
                 <p><strong>
@@ -86,7 +83,7 @@
         <h2 id="create-auc">CREATE A NEW AUCTION</h2>
 
         <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
-        <form th:method="GET" th:action="@{/GoToSell}">
+        <form method="GET" action="@{/GoToSell}">
 
             <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
             <input type="hidden"  th:each="article : ${articlesSelected}" th:value="${article.article_id}" name="alreadySelected">
