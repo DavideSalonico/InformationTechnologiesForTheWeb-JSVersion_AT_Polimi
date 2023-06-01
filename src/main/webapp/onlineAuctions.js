@@ -58,7 +58,7 @@
     }
 
     function PageOrchestrator() {
-        let alertContainer = document.getElementById("id_alert");
+        alertContainer = document.getElementById("id_alert");
 
         this.start = function() {
             menu = new Menu(document.getElementById("home_anchor"),
