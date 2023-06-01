@@ -29,11 +29,11 @@
             </div>
         </div>
 
-        <div class="id_sellPage">
+        <div id="id_sellPage">
             <!-- ASTE APERTE -->
-            <div class="row first-row auc-list"  >
+            <div id="id_openAuctions" class="row first-row auc-list"  >
                 <h2>Open Auctions</h2>
-                <section id="openAuctions">
+                <section>
                     <p>No open auctions found, create some new Auctions! </p>
                     <section class="scrollable" >
                         <a>
@@ -58,9 +58,9 @@
                 </section>
             </div>
             <!-- ASTE CHIUSE -->
-            <div class="row second-row auc-list" >
+            <div id="id_closedAuctions" class="row second-row auc-list" >
                 <h2>Closed Auctions</h2>
-                <section id="closeAuctions">
+                <section>
                     <p>No closed auctions found, create some new Auctions! </p>
                     <section class="scrollable" >
                         <a>
@@ -85,7 +85,7 @@
                 </section>
             </div>
             <!-- CREATE ARTICLE -->
-            <div id="createArticle" class="row third-row form">
+            <div id="id_createArticle" class="row third-row form">
                 <h2>CREATE A NEW ARTICLE</h2>
                 <form method="post" action="@{/CreateArticle}" enctype="multipart/form-data">
                     <div>
@@ -109,11 +109,11 @@
                 </form>
             </div>
             <!-- CREATE AUCTION -->
-            <div class="row fourth-row form">
-                <h2 id="create-auc">CREATE A NEW AUCTION</h2>
+            <div id="id_createAuction" class="row fourth-row form">
+                <h2>CREATE A NEW AUCTION</h2>
 
                 <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
-                <form method="GET" action="@{/GoToSell}">
+                <form method="GET" action="#">
 
                     <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
                     <input type="hidden"  each="article : ${articlesSelected}" value="${article.article_id}" name="alreadySelected">
@@ -173,10 +173,8 @@
                 </form>
             </div>
         </div>
-
-
         <!-- Page PURCHASE -->
-        <div class="id_purchasePage">
+        <div id="id_purchasePage">
             <div>
 
                 <!-- SEARCH FORM -->
@@ -202,11 +200,10 @@
                 </div>
 
                 <!-- WON OFFERS -->
-                <div id="wonOffers"  class="row third-row offers-list">
+                <div id="id_wonOffers"  class="row third-row offers-list">
                     <h2>Won Offers</h2>
                     <section class="scrollable scrll-table" if="${winningOffers} != null and not ${winningOffers.isEmpty()}">
                         <div each="auction : ${winningOffers.keySet()}">
-                            <h3 text="'Maximum Offered for this auction &#x20AC; : '+ ${winningOffers.get(auction).getPrice()}" >Offerta massima </h3>
                             <table>
                                 <thead>
                                 <tr>

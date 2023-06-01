@@ -1,6 +1,6 @@
 {
     //page components
-    let loginBanner, menu, searchForm;
+    let loginBanner, menu, purchasePage, sellPage;
     let alertContainer = document.getElementById("id_alert");
 
     pageOrchestrator = new PageOrchestrator();
@@ -28,23 +28,6 @@
         this.show = function(){
             this.messagecontainer.textContent = "Welcome back " + _username;
             this.bannercontainer.style.display = "block";
-        };
-    }
-
-    function SellPage(_username, _sellcontainer, _openAuctions, _closedAuctions, _createArticle, _createAuction){
-        this.username = _username;
-        this.sellcontainer = _sellcontainer;
-        this.openAuctions = _openAuctions;
-        this.closedAuctions = _closedAuctions;
-        this.createArticle = _createArticle;
-        this.createAuction = _createAuction;
-
-        this.reset = function(){
-            this.sellcontainer.style.display = "none";
-        };
-
-        this.show = function(){
-            this.sellcontainer.style.display = "block";
         };
     }
 
@@ -76,18 +59,12 @@
 
     function SearchForm(_searchButton, _searchedAuctionsContainerDiv){
         this.searchButton = _searchButton;
-        this.searchContainer = this.searchButton.closest("form");
         this.searchedAuctionsContainerDiv = _searchedAuctionsContainerDiv;
-
-        this.reset = function(){
-            let self = this
-            self.searchContainer.style.display = "none";
-        }
 
         this.show = function(){
             let self = this;
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
-            self.searchContainer.style.display = "block";
+
         }
 
         this.registerEvents = function(){
@@ -153,7 +130,7 @@
                 tbody = document.createElement("tbody");
                 let row, namecell, codecell, pricecell, par;
                 auction.articles.forEach(function(article){
-                    row.document.createElement("tr");
+                    row = document.createElement("tr");
                     namecell = document.createElement("td");
                     namecell.textContent = article.name;
                     row.appendChild(namecell);
@@ -172,6 +149,224 @@
                 anchor.appendChild(par);
                 self.searchedAuctionsDiv.appendChild(anchor);
             });
+            self.searchedAuctionsDiv.style.display = "block";
+        }
+    }
+
+    function WonOfferContainer(_wonOfferContainer){
+        this.wonOfferContainer = _wonOfferContainer;
+
+        this.show = function(){
+            let self = this;
+            makeCall("GET", "GoToPurchase", null,
+                function(req){
+                    if (req.readyState === 4) {
+                        let message = req.responseText;
+                        if (req.status === 200) {
+                            let wonOffers = JSON.parse(req.responseText);
+                            self.update(wonOffers);
+                        } else if (req.status === 403) {
+                            window.location.href = req.getResponseHeader("Location");
+                            window.sessionStorage.removeItem('username');
+                        }
+                        else {
+                            self.alert.textContent = message;
+
+                        }
+                    }
+                });
+        };
+
+        this.update = function(wonOffers){
+            let self = this;
+            if(wonOffers != null){
+                wonOffers.forEach(function(offer){
+                    let table, thead, tbody, hrow, namehead, codehead, pricehead, row, namecell, codecell, pricecell, par;
+                    table = document.createElement("table");
+                    thead = document.createElement("thead");
+                    hrow = document.createElement("tr");
+                    namehead = document.createElement("td");
+                    namehead.textContent = "Article Name";
+                    hrow.appendChild(namehead);
+                    codehead = document.createElement("td");
+                    codehead.textContent = "Code";
+                    hrow.appendChild(codehead);
+                    pricehead = document.createElement("td");
+                    pricehead.textContent = "Price";
+                    hrow.appendChild(pricehead);
+                    thead.appendChild(hrow);
+                    table.appendChild(thead);
+                    tbody = document.createElement("tbody");
+                    row = document.createElement("tr");
+                    namecell = document.createElement("td");
+                    namecell.textContent = article.name;
+                    row.appendChild(namecell);
+                    codecell = document.createElement("td");
+                    codecell.textContent = article.code;
+                    row.appendChild(codecell);
+                    pricecell = document.createElement("td");
+                    pricecell.textContent = article.price;
+                    row.appendChild(pricecell);
+                    tbody.appendChild(row);
+                    table.appendChild(tbody);
+                    par = document.createElement("p");
+                    par.textContent = "Maximum offer for this Auction: " + offer.price;
+                    self.wonOfferContainer.appendChild(table);
+                    self.wonOfferContainer.appendChild(par)
+                })
+            }
+        }
+    }
+
+    function AuctionList(_auctionContainer, open){
+        this.container = _auctionContainer;
+        this.open = open;
+
+        this.show = function(){
+            let self = this;
+            makeCall("GET", "GoToSell", null, //Da aggiungere this.open al posto di null
+                function(req){
+                    if (req.readyState === 4) {
+                        let message = req.responseText;
+                        if (req.status === 200) {
+                            let openAuctions = JSON.parse(req.responseText);
+                            self.update(openAuctions);
+                        } else if (req.status === 403) {
+                            window.location.href = req.getResponseHeader("Location");
+                            window.sessionStorage.removeItem('username');
+                        }
+                        else {
+                            self.alert.textContent = message;
+                        }
+                    }
+                });
+        }
+
+        this.update = function (auctionList){
+            let self = this;
+            auctionList.forEach(function(auction){
+                let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead;
+                anchor = document.createElement("a");
+                anchor.href = "#";
+                table = document.createElement("table");
+                thead = document.createElement("thead");
+                hrow = document.createElement("tr");
+                namehead = document.createElement("td");
+                namehead.textContent = "Name";
+                hrow.appendChild(namehead);
+                codehead = document.createElement("td");
+                codehead.textContent = "Code";
+                hrow.appendChild(codehead);
+                pricehead = document.createElement("td");
+                pricehead.textContent = "Price";
+                hrow.appendChild(pricehead);
+                thead.appendChild(hrow);
+                table.appendChild(thead);
+                tbody = document.createElement("tbody");
+                let row, namecell, codecell, pricecell, par;
+                auction.articles.forEach(function(article){
+                    row = document.createElement("tr");
+                    namecell = document.createElement("td");
+                    namecell.textContent = article.name;
+                    row.appendChild(namecell);
+                    codecell = document.createElement("td");
+                    codecell.textContent = article.code;
+                    row.appendChild(codecell);
+                    pricecell = document.createElement("td");
+                    pricecell.textContent = article.price;
+                    row.appendChild(pricecell);
+                    tbody.appendChild(row);
+                })
+                table.appendChild(tbody);
+                par = document.createElement("p");
+                par.textContent = "Maximum offer: " + auction.maxOffer;
+                anchor.appendChild(table);
+                anchor.appendChild(par);
+                self.container.appendChild(anchor);
+            });
+        }
+    }
+
+    function CreateArticleWizard(_articleWizard){
+        this.articleWizard = _articleWizard;
+
+        this.show = function(){
+            let self = this;
+            //TODO : AJAX
+            self.update();
+        }
+
+        this.update = function(){
+            //TODO: Costruzione MarkUp
+        }
+    }
+
+    function CreateAuctionWizard(_auctionWizard){
+        this.auctionWizard = _auctionWizard;
+
+        this.show = function(){
+            let self = this;
+            //TODO : AJAX
+            self.update();
+        }
+
+        this.update = function(){
+            //TODO: Costruzione MarkUp
+        }
+    }
+
+    function PurchasePage(orchestrator, _purchasePage) {
+        let searchForm, wonOffers;
+        this.orchestrator = orchestrator;
+        this.purchasePage = _purchasePage;
+
+        this.start = function () {
+            searchForm = new SearchForm(document.getElementById("id_searchButton"), document.getElementById("id_searchedAuctions"));
+            searchForm.show();
+            searchForm.registerEvents();
+
+            wonOffers = new WonOfferContainer(document.getElementById("id_wonOffers"));
+            wonOffers.show();
+        };
+
+        this.reset = function () {
+            let self = this;
+            self.purchasePage.style.display = "none";
+        }
+
+        this.show = function () {
+            let self = this;
+            self.purchasePage.style.display = "block";
+        }
+    }
+
+    function SellPage(orchestrator, _sellPage) {
+        let openAuctions, closedAuctions, createArticleWizard, createAuctionWizard;
+        this.orchestrator = orchestrator;
+        this.sellPage = _sellPage;
+
+        this.start = function () {
+            openAuctions = new AuctionList(document.getElementById("id_openAuctions"), true);
+            openAuctions.show();
+
+            closedAuctions = new AuctionList(document.getElementById("id_closedAuctions"), false);
+            closedAuctions.show();
+
+            createArticleWizard = new CreateArticleWizard(document.getElementById("id_createArticle"));
+            createArticleWizard.show();
+
+            createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_createAuction"));
+            createAuctionWizard.show();
+        };
+
+        this.reset = function () {
+            let self = this;
+            self.sellPage.style.display = "none";
+        }
+
+        this.show = function () {
+            let self = this;
+            self.sellPage.style.display = "block";
         }
     }
 
@@ -190,27 +385,30 @@
                 document.getElementById("id_username"));
             loginBanner.show();
 
-            searchForm = new SearchForm(document.getElementById("id_searchButton"), document.getElementById("id_searchedAuctions"));
-            searchForm.show();
-            searchForm.registerEvents(this);
+            purchasePage = new PurchasePage(this, document.getElementById("id_purchasePage"));
+            purchasePage.start();
+
+            sellPage = new SellPage(this, document.getElementById("id_sellPage"));
+            sellPage.start();
         };
 
         this.refresh = function(){
             alertContainer.textContent = "";
             loginBanner.show();
-            searchForm.reset();
-            searchForm.searchContainer.reset();
+            purchasePage.reset();
+            sellPage.reset();
         };
 
         this.renderPurchase = function(){
             loginBanner.reset();
-            searchForm.show();
+            purchasePage.show();
+            sellPage.reset();
         };
 
         this.renderSell = function(){
             loginBanner.reset();
-            searchForm.reset();
-            searchForm.searchContainer.reset();
+            purchasePage.reset();
+            sellPage.show();
         };
     }
 }
