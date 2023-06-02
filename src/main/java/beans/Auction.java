@@ -1,9 +1,10 @@
 package beans;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Auction {
+public class Auction implements Serializable {
 	private int auction_id;
 	private boolean open;
 	private int initial_price;
@@ -56,5 +57,15 @@ public class Auction {
 		return auction_id == auction.auction_id && open == auction.open && initial_price == auction.initial_price && minimum_raise == auction.minimum_raise && creator == auction.creator && Objects.equals(expiring_date, auction.expiring_date);
 	}
 
-
+	@Override
+	public String toString() {
+		return "Auction{" +
+				"auction_id=" + auction_id +
+				", open=" + open +
+				", initial_price=" + initial_price +
+				", minimum_raise=" + minimum_raise +
+				", expiring_date=" + expiring_date +
+				", creator=" + creator +
+				'}';
+	}
 }
