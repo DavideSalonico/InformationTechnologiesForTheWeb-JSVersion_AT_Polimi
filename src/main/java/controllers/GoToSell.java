@@ -1,14 +1,14 @@
 package controllers;
 
-import DAO.ArticleDAO;
 import DAO.AuctionDAO;
 import DAO.OfferDAO;
 import beans.Article;
 import beans.Auction;
 import beans.Offer;
 import beans.User;
+import com.google.gson.Gson;
+import utils.AuctionWrap;
 import utils.ConnectionHandler;
-import utils.DiffTime;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @WebServlet("/GoToSell")
@@ -29,9 +27,7 @@ public class GoToSell extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-    
 	private AuctionDAO auctionDAO;
-	private ArticleDAO articleDAO;
 	private OfferDAO offerDAO;
 
 	public void init() throws ServletException {
@@ -40,7 +36,6 @@ public class GoToSell extends HttpServlet {
 		connection = ConnectionHandler.getConnection(servletContext);
 		
 		auctionDAO = new AuctionDAO(connection);
-		articleDAO = new ArticleDAO(connection);
 		offerDAO = new OfferDAO(connection);
 	}
 	
@@ -52,115 +47,48 @@ public class GoToSell extends HttpServlet {
 		}
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		setupPage(request, response);
-	}
 	
-	private void setupPage(HttpServletRequest request, HttpServletResponse response) throws IOException
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
 		User user = (User) request.getSession().getAttribute("user");
 
-		List<Auction> openAuctions;
-		List<Auction> closedAuctions;
-		List<Article> articles;
-
 		Offer maxOffer;
 
-		Map<Auction,List<Article>> userOpenAuctions = new HashMap<>();
-    	Map<Auction, List<Article>> userClosedAuctions = new LinkedHashMap<>();
-    	HashMap<Integer, DiffTime> remainingTimes = new HashMap<>();
+		LinkedHashMap<Auction,List<Article>> userAuctions;
+		LinkedHashMap<Auction,List<Article>> userOpenAuctions = new LinkedHashMap<>();
+    	LinkedHashMap<Auction, List<Article>> userClosedAuctions = new LinkedHashMap<>();
     	HashMap<Integer, Offer> maxOffers = new HashMap<>();
 
-		List <Article> articlesSelected = new ArrayList<>();
-		Article chosenArticle;
+		AuctionWrap auctionWrap;
 
 		try {
-			if(request.getParameterValues("alreadySelected") != null){
-				String [] selectedArticles = request.getParameterValues("alreadySelected");
-				for(String string : selectedArticles) {
-					Article temp = articleDAO.getArticle(Integer.parseInt(string));
-					articlesSelected.add(temp);
+
+			userAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());
+
+			for (Auction auction : userAuctions.keySet() ) {
+
+				if(auction.isOpen()){
+					userOpenAuctions.put(auction, userAuctions.get(auction));
+				}else {
+					userClosedAuctions.put(auction, userAuctions.get(auction));
 				}
-			}
-			if(request.getParameter("articleSelected") != null) {
-				int selectedArticleId = Integer.parseInt(request.getParameter("articleSelected"));
-				chosenArticle = articleDAO.getArticle(selectedArticleId);
-				articlesSelected.add(chosenArticle);
-			}
-			openAuctions = auctionDAO.getOpenAuctions(user.getUser_id());
-			closedAuctions = auctionDAO.getClosedAuctions(user.getUser_id());
-			
-			//Manage all the user's open auction
-			for (Auction auction : openAuctions ) {
-				articles = articleDAO.getAuctionArticles(auction.getAuction_id());
+
 				maxOffer = offerDAO.getWinningOffer(auction.getAuction_id());
-				
-				for(Article article : articles) {
-					if(!userOpenAuctions.containsKey(auction)) {
-						userOpenAuctions.put(auction, new ArrayList<>());
-						userOpenAuctions.get(auction).add(article);
-					}
-					else {
-						userOpenAuctions.get(auction).add(article);
-					}
-				}
-				
-				LocalDateTime logLdt = (LocalDateTime) request.getSession(false).getAttribute("creationTime");
-				DiffTime diff = DiffTime.getRemainingTime(logLdt, auction.getExpiring_date());
-				remainingTimes.put(auction.getAuction_id(), diff);
-				if(maxOffer != null)
-					maxOffers.put(auction.getAuction_id(), maxOffer);
-			}
-			
-			//Manage all the user's closed auction
-			for (Auction auction : closedAuctions ) {
-				articles = articleDAO.getAuctionArticles(auction.getAuction_id());
-				maxOffer = offerDAO.getWinningOffer(auction.getAuction_id());
-				
-				for(Article article : articles) {
-					if(!userClosedAuctions.containsKey(auction)) {
-						userClosedAuctions.put(auction, new ArrayList<>());
-						userClosedAuctions.get(auction).add(article);
-					}
-					else {
-						userClosedAuctions.get(auction).add(article);
-					}
-				}
-				
-				LocalDateTime logLdt = (LocalDateTime) request.getSession(false).getAttribute("creationTime");
-				DiffTime diff = DiffTime.getRemainingTime(logLdt, auction.getExpiring_date());
-				remainingTimes.put(auction.getAuction_id(), diff);
+
 				if(maxOffer != null)
 					maxOffers.put(auction.getAuction_id(), maxOffer);
 			}
 
-			articles = articleDAO.getAvailableUserArticles(user.getUser_id());
-
-			if(!articlesSelected.isEmpty()) {
-				for (Article x : articlesSelected) {
-					articles.remove(x);
-				}
-			}
+			auctionWrap = new AuctionWrap(userOpenAuctions, userClosedAuctions,maxOffers);
 
 		}catch(SQLException e){
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover articles in database");
 			return;
 		}
 
-		// Get the current LocalDateTime and creates the ldt variable
-		// It is used as initial value for the datetime-local tag in sell.html
-		LocalDateTime ldt = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
-					
-		String path = "/WEB-INF/sell.html";
-		ServletContext servletContext = getServletContext();
-		//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		//ctx.setVariable("userOpenAuctions", userOpenAuctions);
-		//ctx.setVariable("userClosedAuctions", userClosedAuctions);
-		//ctx.setVariable("remainingTimes", remainingTimes);
-		//ctx.setVariable("maxOffers", maxOffers);
-		//ctx.setVariable("ldt", ldt);
-		//ctx.setVariable("articles", articles);
-		//ctx.setVariable("articlesSelected", articlesSelected);
-		//templateEngine.process(path, ctx, response.getWriter());
+		String json = new Gson().toJson(auctionWrap);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().write(json);
     }
 }

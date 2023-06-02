@@ -70,7 +70,8 @@ public class WonOffers extends HttpServlet {
 			user = (User) request.getSession().getAttribute("user");
 			logLdt = ((LocalDateTime) request.getSession(false).getAttribute("creationTime")).truncatedTo(ChronoUnit.MINUTES);
 		} catch (NullPointerException e){
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error, user not logged in correctly!");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Error, user not logged in correctly!");
 			return;
 		}
 
