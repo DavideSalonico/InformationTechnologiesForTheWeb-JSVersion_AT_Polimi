@@ -23,15 +23,16 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet("/GoToPurchase")
-public class GoToPurchase extends HttpServlet {
+@WebServlet("/WonOffers")
+public class WonOffers extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	
+
 	AuctionDAO auctionDAO;
 	ArticleDAO articleDAO;
 	OfferDAO offerDAO;
@@ -63,11 +64,13 @@ public class GoToPurchase extends HttpServlet {
 		LocalDateTime logLdt = null;
 		LocalDateTime currLdt = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
 
+		LinkedHashMap<Auction,List<Article>> orderedFilteredMap= new LinkedHashMap<>();
+
 		try{
 			user = (User) request.getSession().getAttribute("user");
 			logLdt = ((LocalDateTime) request.getSession(false).getAttribute("creationTime")).truncatedTo(ChronoUnit.MINUTES);
 		} catch (NullPointerException e){
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Errore, user not logged in correctly!");
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error, user not logged in correctly!");
 			return;
 		}
 

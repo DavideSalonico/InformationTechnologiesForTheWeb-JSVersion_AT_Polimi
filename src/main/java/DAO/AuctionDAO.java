@@ -1,5 +1,6 @@
 package DAO;
 
+import beans.Article;
 import beans.Auction;
 
 import java.sql.Connection;
@@ -7,8 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class AuctionDAO {
 	private Connection connection;
@@ -76,6 +76,47 @@ public class AuctionDAO {
 			}
 		}
 		return filteredAuctions;
+	}
+
+	public LinkedHashMap<Auction, List<Article>> getFiltered(String keyword, LocalDateTime time) throws SQLException{
+
+		LinkedHashMap<Auction, List<Article>> mapfilteredAuctions = new LinkedHashMap<>();
+
+		try{
+			pstatement = connection.prepareStatement("SELECT * FROM auction x JOIN article y on x.auction_id= y.auction_id where x.auction_id = (SELECT DISTINCT au.auction_id FROM auction au JOIN article ar ON ar.auction_id = au.auction_id WHERE (ar.name LIKE ? OR ar.description LIKE ?) AND au.expiring_date > ? AND au.open = '1') ORDER BY x.expiring_date ASC, y.article_id ASC");
+			pstatement.setString(1, "%" + keyword.toUpperCase() + "%");
+			pstatement.setString(2, "%" + keyword.toUpperCase() + "%");
+			pstatement.setObject(3, time);
+			result = pstatement.executeQuery();
+			while (result.next()) {
+				Auction auction = resultToAuction(result);
+				Article article = resultToArticle(result);
+				if(mapfilteredAuctions.containsKey(auction)){
+					mapfilteredAuctions.get(auction).add(article);
+				}
+				else{
+					List<Article> articles = new ArrayList<>();
+					articles.add(article);
+					mapfilteredAuctions.put(auction, articles);
+				}
+
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+		} finally {
+			try {
+				result.close();
+			} catch(Exception e1) {
+				throw new SQLException(e1);
+			}
+			try {
+				pstatement.close();
+			} catch(Exception e2) {
+				throw new SQLException(e2);
+			}
+		}
+		return mapfilteredAuctions;
 	}
 
 	public List<Auction> getOpenAuctions(int user_id) throws SQLException{
@@ -166,6 +207,9 @@ public class AuctionDAO {
 		int outcome = 0;
 		try {
 			pstatement = connection.prepareStatement("UPDATE auction SET open = 0 WHERE auction_id = ?");
+
+			// AGGIUNGERE ARTCLE POSTO A SOLD = 1
+
 			pstatement.setInt(1, auction_id);
 			pstatement.executeUpdate();
 			//FAI CONTROLLO
@@ -241,4 +285,19 @@ public class AuctionDAO {
 		auction.setExpiring_date(result.getTimestamp("expiring_date").toLocalDateTime());
 		return auction;
 	}
+
+	public Article resultToArticle(ResultSet result) throws SQLException{
+		Article article = new Article();
+		article.setArticle_id(result.getInt("article_id"));
+		article.setName(result.getString("name"));
+		article.setDescription(result.getString("description"));
+		article.setImage(result.getBlob("image"));
+		article.setArticle_creator(result.getInt("article_creator"));
+		article.setAuction_id(result.getInt("auction_id"));
+		article.setPrice(result.getInt("price"));
+		article.setSold(result.getBoolean("sold"));
+
+		return article;
+	}
+
 }
