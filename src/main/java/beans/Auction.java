@@ -1,15 +1,14 @@
 package beans;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Auction implements Serializable {
+public class Auction{
 	private int auction_id;
 	private boolean open;
 	private int initial_price;
 	private int minimum_raise;
-	private LocalDateTime expiring_date;
+	public LocalDateTime expiring_date;
 	private int creator;
 	
 	public int getAuction_id() {

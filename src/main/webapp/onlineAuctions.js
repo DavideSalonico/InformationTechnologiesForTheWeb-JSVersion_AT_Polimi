@@ -1,6 +1,6 @@
 {
     //page components
-    let loginBanner, menu, purchasePage, sellPage;
+    let loginBanner, menu, purchasePage, sellPage, offersPage, auctionDetailsPage;
     let alertContainer = document.getElementById("id_alert");
 
     pageOrchestrator = new PageOrchestrator();
@@ -15,7 +15,6 @@
     }, false);
 
     // Constructors of view components
-
     function LoginBanner(_username, _bannercontainer, _messagecontainer){
         this.username = _username;
         this.bannercontainer = _bannercontainer;
@@ -57,6 +56,8 @@
         }
     }
 
+    //il parametro della keyword lo passo con "key" nel form appeso all'url (e non la chiave)
+    //leggo un JSON che ha attributi "auction_id", "price", "raise", "expiring_time", "articles"
     function SearchForm(_searchButton, _searchedAuctionsContainerDiv){
         this.searchButton = _searchButton;
         this.searchedAuctionsContainerDiv = _searchedAuctionsContainerDiv;
@@ -64,7 +65,6 @@
         this.show = function(){
             let self = this;
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
-
         }
 
         this.registerEvents = function(){
@@ -72,15 +72,20 @@
                 let form = e.target.closest("form");
                 if(form.checkValidity()){
                     let self = this;
-                    let keyword = form.querySelector("input").value;
-                    makeCall("GET", 'GoToPurchase', keyword,
+                    let key = form.querySelector("input").value;
+                    //if(key === ""){
+                    //    self.alert.textContent = "Insert a keyword";
+                    //    return;
+                    //}
+                    makeCall("GET", 'Search?key=' + key,null,
                         function(req){
                         if(req.readyState === 4){
                             let message = req.responseText;
                             if(req.status === 200){
-                                let searchedAuctions = JSON.parse(req.responseText);
-                                self.searchedAuctionContainer.update(searchedAuctions);
-                                self.reset();
+                                let filteredAuctions = new Map();
+                                filteredAuctions = JSON.parse(req.responseText);
+                                self.searchedAuctionContainer.update(filteredAuctions);
+                                //self.reset(); // to delete the inserted key in the form
                             }
                             else if(req.status === 403){
                                 window.location.href = req.getResponseHeader("Location"); //TODO: ???
@@ -107,12 +112,13 @@
             this.searchedAuctionsDiv.innerHTML = "";
         }
 
-        this.update = function(auctionList){
-            let self = this;
-            auctionList.forEach(function(auction){
-                let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead;
+        this.update = function(auctionMap){
+            let self = this, datetime = new Date();
+            //datetime = datetime.getVarDate();
+            Object.entries(auctionMap).forEach((auction, articles) => {
+                let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                 anchor = document.createElement("a");
-                anchor.href = "#";
+                anchor.href = "";
                 table = document.createElement("table");
                 thead = document.createElement("thead");
                 hrow = document.createElement("tr");
@@ -128,8 +134,8 @@
                 thead.appendChild(hrow);
                 table.appendChild(thead);
                 tbody = document.createElement("tbody");
-                let row, namecell, codecell, pricecell, par;
-                auction.articles.forEach(function(article){
+                Object.entries(articles).forEach((article) => {
+                    let row, namecell, codecell, pricecell;
                     row = document.createElement("tr");
                     namecell = document.createElement("td");
                     namecell.textContent = article.name;
@@ -141,12 +147,14 @@
                     pricecell.textContent = article.price;
                     row.appendChild(pricecell);
                     tbody.appendChild(row);
-                })
+                });
                 table.appendChild(tbody);
-                par = document.createElement("p");
-                par.textContent = "Maximum offer: " + auction.maxOffer;
+                //par = document.createElement("p");
+                //let diffTime = new Date();
+                //diffTime = auction.expiring_date - datetime;
+                //par.textContent = "Remaining time: " + diffTime;
                 anchor.appendChild(table);
-                anchor.appendChild(par);
+                //anchor.appendChild(par);
                 self.searchedAuctionsDiv.appendChild(anchor);
             });
             self.searchedAuctionsDiv.style.display = "block";
@@ -158,7 +166,8 @@
 
         this.show = function(){
             let self = this;
-            makeCall("GET", "GoToPurchase", null,
+            /*
+            makeCall("GET", "", null,
                 function(req){
                     if (req.readyState === 4) {
                         let message = req.responseText;
@@ -175,6 +184,7 @@
                         }
                     }
                 });
+             */
         };
 
         this.update = function(wonOffers){
@@ -224,13 +234,14 @@
 
         this.show = function(){
             let self = this;
+            /*
             makeCall("GET", "GoToSell", null, //Da aggiungere this.open al posto di null
                 function(req){
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
-                            let openAuctions = JSON.parse(req.responseText);
-                            self.update(openAuctions);
+                            let Auctions = JSON.parse(req.responseText);
+                            self.update(Auctions);
                         } else if (req.status === 403) {
                             window.location.href = req.getResponseHeader("Location");
                             window.sessionStorage.removeItem('username');
@@ -240,6 +251,7 @@
                         }
                     }
                 });
+             */
         }
 
         this.update = function (auctionList){
@@ -370,6 +382,48 @@
         }
     }
 
+    function OffersPage(orchestrator, _offersPage) {
+        let offersList;
+        this.orchestrator = orchestrator;
+        this.offersPage = _offersPage;
+
+        this.start = function () {
+            //offersList = new OffersList(document.getElementById("id_offersList"));
+            //offersList.show();
+        };
+
+        this.reset = function () {
+            let self = this;
+            self.offersPage.style.display = "none";
+        }
+
+        this.show = function () {
+            let self = this;
+            self.offersPage.style.display = "block";
+        }
+    }
+
+    function AuctionDetailsPage(orchestrator, _auctionDetailsPage) {
+        let auctionDetails;
+        this.orchestrator = orchestrator;
+        this.auctionDetailsPage = _auctionDetailsPage;
+
+        this.start = function () {
+            //auctionDetails = new AuctionDetails(document.getElementById("id_auctionDetails"));
+            //auctionDetails.show();
+        };
+
+        this.reset = function () {
+            let self = this;
+            self.auctionDetailsPage.style.display = "none";
+        }
+
+        this.show = function () {
+            let self = this;
+            self.auctionDetailsPage.style.display = "block";
+        }
+    }
+
     function PageOrchestrator() {
         alertContainer = document.getElementById("id_alert");
 
@@ -390,6 +444,12 @@
 
             sellPage = new SellPage(this, document.getElementById("id_sellPage"));
             sellPage.start();
+
+            offersPage = new OffersPage(this, document.getElementById("id_offersPage"));
+            offersPage.start();
+
+            auctionDetailsPage = new AuctionDetailsPage(this, document.getElementById("id_auctionDetailsPage"));
+            auctionDetailsPage.start();
         };
 
         this.refresh = function(){
@@ -397,18 +457,40 @@
             loginBanner.show();
             purchasePage.reset();
             sellPage.reset();
+            offersPage.reset();
+            auctionDetailsPage.reset();
         };
 
         this.renderPurchase = function(){
             loginBanner.reset();
             purchasePage.show();
             sellPage.reset();
+            offersPage.reset()
+            auctionDetailsPage.reset();
         };
 
         this.renderSell = function(){
             loginBanner.reset();
             purchasePage.reset();
             sellPage.show();
+            offersPage.reset();
+            auctionDetailsPage.reset();
         };
+
+        this.renderOffers = function(){
+            loginBanner.reset();
+            purchasePage.reset();
+            sellPage.reset();
+            offersPage.show();
+            auctionDetailsPage.reset();
+        }
+
+        this.renderAuctionDetails = function(){
+            loginBanner.reset();
+            purchasePage.reset();
+            sellPage.reset();
+            offersPage.reset();
+            auctionDetailsPage.show();
+        }
     }
 }

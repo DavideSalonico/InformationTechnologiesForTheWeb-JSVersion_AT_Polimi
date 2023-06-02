@@ -180,12 +180,14 @@
                 <!-- SEARCH FORM -->
                 <div class="row first-row form">
                     <h2>Search with a keyword</h2>
-                    <form   action="#" method="GET">
-                        <div>
-                            <label for="key">Key:</label>
-                            <input type="text" name="key" id="key" required>
-                        </div>
-                        <button id="id_searchButton"  type="submit">Search</button>
+
+                    <form action="#">
+                        <fieldset>
+                            <p> Keyword:
+                                <input type="text" required/>
+                            </p>
+                            <input id="id_searchButton" type="button" value="Search">
+                        </fieldset>
                     </form>
                 </div>
 
@@ -223,7 +225,7 @@
         </div>
 
         <!-- Page AUCTIONDETAILS -->
-        <div id="id_auctionDetails" >
+        <div id="id_auctionDetailsPage" >
             <div class="row first-row details">
                 <h2 if="${auction == null}">INFORMATIONS</h2>
                 <p if="${auction == null}">User did not create the auction or user does not exists</p>
@@ -299,7 +301,7 @@
         </div>
 
         <!-- Page OFFER -->
-        <div id="id_offer" >
+        <div id="id_offersPage" >
             <div>
 
                 <!-- INFO ABOUT AUCTION (articles etc) -->
@@ -361,7 +363,7 @@
                     <form action="#" action="@{/MakeOffer}" method="post">
                         <div>
                             <label for="offer">Value:</label>
-                            <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" min="${min}" value="${min}" with="min=${not offers.isEmpty()} ? ${maxAuctionOffer.price + auction.minimum_raise} : ${auction.initial_price}" required>
+                            <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" min="${min}" required>
                             <span>&euro;</span>
                             <input type="hidden" name="auctionId" value="${auction.auction_id}">
                         </div>

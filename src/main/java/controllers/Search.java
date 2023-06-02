@@ -5,7 +5,10 @@ import DAO.AuctionDAO;
 import beans.Article;
 import beans.Auction;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import utils.AuctionFullInfo;
 import utils.ConnectionHandler;
+import utils.LocalDateTimeTypeAdapter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -73,8 +77,17 @@ public class Search extends HttpServlet {
 			}
 		}
 
+		List<AuctionFullInfo> list = new ArrayList<>();
+		for(Auction a : orderedFilteredMap.keySet()){
+			list.add(new AuctionFullInfo(a, orderedFilteredMap.get(a), null));
+		}
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+				.create();
+		String json = gson.toJson(list);
 
-		String json = new Gson().toJson(orderedFilteredMap);
+
+		//String json = new Gson().toJson(orderedFilteredMap);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(json);
