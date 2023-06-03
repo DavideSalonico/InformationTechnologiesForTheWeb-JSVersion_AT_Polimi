@@ -5,8 +5,11 @@ import DAO.OfferDAO;
 import beans.Article;
 import beans.Auction;
 import beans.User;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import utils.AuctionFullInfo;
 import utils.ConnectionHandler;
+import utils.LocalDateTimeTypeAdapter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,6 +21,7 @@ import java.io.IOException;
 import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,21 +57,22 @@ public class GetAuctionsList extends HttpServlet {
 		LinkedHashMap<Auction,List<Article>> userAuctions;
 
 		try {
-			userAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());
-
-			for (Auction auction : userAuctions.keySet() ) {
-				// Client will receive all the Auctions with their articles and the winning offer, it will distinguish between open and closed auctions
-				finalUserAuctions.add(new AuctionFullInfo(auction, userAuctions.get(auction),offerDAO.getWinningOffer(auction.getAuction_id())));
-			}
-
+			finalUserAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());
 		}catch(SQLException e){
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Not possible to recover articles in database");
 			return;
 		}
 
-		response.setStatus(HttpServletResponse.SC_OK);
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+				.create();
+		String json = gson.toJson(finalUserAuctions);
+
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.getWriter().println(json);
+
+		response.setStatus(HttpServletResponse.SC_OK);
     }
 }

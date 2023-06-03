@@ -58,10 +58,10 @@ public class GoToSell extends HttpServlet {
 		LinkedHashMap<Auction,List<Article>> userOpenAuctions = new LinkedHashMap<>();
     	LinkedHashMap<Auction, List<Article>> userClosedAuctions = new LinkedHashMap<>();
     	HashMap<Integer, Offer> maxOffers = new HashMap<>();
-
+/*
 		try {
 
-			userAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());
+			//userAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());
 
 			for (Auction auction : userAuctions.keySet() ) {
 
@@ -81,6 +81,8 @@ public class GoToSell extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover articles in database");
 			return;
 		}
+
+ */
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

@@ -3,6 +3,7 @@ package DAO;
 import beans.Article;
 import beans.Auction;
 import utils.AuctionDetailsInfo;
+import beans.Offer;
 import utils.AuctionFullInfo;
 
 import java.sql.Connection;
@@ -122,43 +123,6 @@ public class AuctionDAO {
 		return auctionFullList;
 	}
 
-	public AuctionDetailsInfo getAuctionDetails (int auction_id) throws SQLException {
-		AuctionDetailsInfo elem;
-
-		Auction auction = null;
-		List<Article> articles = new ArrayList<>();
-		boolean firstTime = true;
-		try {
-			pstatement = connection.prepareStatement("SELECT * FROM auction x JOIN article y on x.auction_id = y.auction_id WHERE x.auction_id = ?");
-			pstatement.setInt(1, auction_id);
-			result = pstatement.executeQuery();
-			while(result.next()) {
-				if (firstTime){
-					 auction = resultToAuction(result);
-					firstTime = false;
-				}
-				Article article = resultToArticle(result);
-				articles.add(article);
-			}
-			elem = new AuctionDetailsInfo(auction, articles, null, null);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new SQLException(e);
-		} finally {
-			try {
-				result.close();
-			} catch (Exception e1) {
-				throw new SQLException(e1);
-			}
-			try {
-				pstatement.close();
-			} catch (Exception e2) {
-				throw new SQLException(e2);
-			}
-		}
-		return elem;
-	}
-
 	public List<Auction> getOpenAuctions(int user_id) throws SQLException{
 		List<Auction> auctions = new ArrayList<>();	
 		try {
@@ -217,11 +181,13 @@ public class AuctionDAO {
 
 	public LinkedHashMap<Auction, List<Article>> getAuctionsByUser(int user_id) throws SQLException{
 		LinkedHashMap<Auction, List<Article>> userAuctions = new LinkedHashMap<>();
+		List<Auction> auctions = new ArrayList<>();
 		try {
 			pstatement = connection.prepareStatement("SELECT * FROM auction x JOIN article y on x.auction_id = y.auction_id WHERE creator = ?");
 			pstatement.setInt(1, user_id);
 			result = pstatement.executeQuery();
 			while(result.next()) {
+				//auctions.add(resultToAuction(result));
 				Auction auction = resultToAuction(result);
 				Article article = resultToArticle(result);
 				if(userAuctions.containsKey(auction)){

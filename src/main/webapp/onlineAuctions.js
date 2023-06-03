@@ -262,14 +262,13 @@
         }
     }
 
-    function AuctionList(_auctionContainer, open){
-        this.container = _auctionContainer;
-        this.open = open;
+    function AuctionLists(_openContainer, _closedContainer){
+        this.openContainer = _openContainer;
+        this.closedContainer = _closedContainer;
 
         this.show = function(){
             let self = this;
-            /*
-            makeCall("GET", "GoToSell", null, //Da aggiungere this.open al posto di null
+            makeCall("GET", "GetAuctionsList", null,
                 function(req){
                     if (req.readyState === 4) {
                         let message = req.responseText;
@@ -285,51 +284,126 @@
                         }
                     }
                 });
-             */
         }
 
         this.update = function (auctionList){
             let self = this;
-            auctionList.forEach(function(auction){
-                let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead;
-                anchor = document.createElement("a");
-                anchor.href = "#";
-                table = document.createElement("table");
-                thead = document.createElement("thead");
-                hrow = document.createElement("tr");
-                namehead = document.createElement("td");
-                namehead.textContent = "Name";
-                hrow.appendChild(namehead);
-                codehead = document.createElement("td");
-                codehead.textContent = "Code";
-                hrow.appendChild(codehead);
-                pricehead = document.createElement("td");
-                pricehead.textContent = "Price";
-                hrow.appendChild(pricehead);
-                thead.appendChild(hrow);
-                table.appendChild(thead);
-                tbody = document.createElement("tbody");
-                let row, namecell, codecell, pricecell, par;
-                auction.articles.forEach(function(article){
-                    row = document.createElement("tr");
-                    namecell = document.createElement("td");
-                    namecell.textContent = article.name;
-                    row.appendChild(namecell);
-                    codecell = document.createElement("td");
-                    codecell.textContent = article.code;
-                    row.appendChild(codecell);
-                    pricecell = document.createElement("td");
-                    pricecell.textContent = article.price;
-                    row.appendChild(pricecell);
-                    tbody.appendChild(row);
-                })
-                table.appendChild(tbody);
-                par = document.createElement("p");
-                par.textContent = "Maximum offer: " + auction.maxOffer;
-                anchor.appendChild(table);
-                anchor.appendChild(par);
-                self.container.appendChild(anchor);
+            let openAuctions = [];
+            let closedAuctions = [];
+            auctionList.forEach((aucFullInfo) => {
+                if(aucFullInfo.auction.open == 1){
+                    openAuctions.push(aucFullInfo);
+                }
+                else{
+                    closedAuctions.push(aucFullInfo);
+                }
             });
+            if(openAuctions.length > 0){
+                self.openContainer.innerHTML = "";
+                openAuctions.forEach((aucFullInfo) => {
+                    let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
+                    anchor = document.createElement("a");
+                    anchor.href = "";
+                    table = document.createElement("table");
+                    thead = document.createElement("thead");
+                    hrow = document.createElement("tr");
+                    namehead = document.createElement("td");
+                    namehead.textContent = "Name";
+                    hrow.appendChild(namehead);
+                    codehead = document.createElement("td");
+                    codehead.textContent = "Code";
+                    hrow.appendChild(codehead);
+                    pricehead = document.createElement("td");
+                    pricehead.textContent = "Price";
+                    hrow.appendChild(pricehead);
+                    thead.appendChild(hrow);
+                    table.appendChild(thead);
+                    tbody = document.createElement("tbody");
+                    aucFullInfo.articles.forEach((article) => {
+                        let row, namecell, codecell, pricecell;
+                        row = document.createElement("tr");
+                        namecell = document.createElement("td");
+                        namecell.textContent = article.name;
+                        row.appendChild(namecell);
+                        codecell = document.createElement("td");
+                        codecell.textContent = article.article_id;
+                        row.appendChild(codecell);
+                        pricecell = document.createElement("td");
+                        pricecell.textContent = article.price;
+                        row.appendChild(pricecell);
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    par = document.createElement("p");
+                    let exp = aucFullInfo.auction.expiring_date;
+                    let expDate = new Date(Date.parse(exp));
+                    let log = sessionStorage.getItem("logDate");
+                    let logDate = new Date(Date.parse(log));
+                    let diffTime = timeDifference(expDate, logDate);
+                    par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                    anchor.appendChild(table);
+                    anchor.appendChild(par);
+                    self.openContainer.appendChild(anchor);
+                });
+            } else{
+                let par = document.createElement("p");
+                par.textContent = "No open auctions";
+                self.openContainer.appendChild(par);
+            }
+
+            if(closedAuctions.length > 0){
+                self.closedContainer.innerHTML = "";
+                closedAuctions.forEach((aucFullInfo) => {
+                    let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
+                    anchor = document.createElement("a");
+                    anchor.href = "";
+                    table = document.createElement("table");
+                    thead = document.createElement("thead");
+                    hrow = document.createElement("tr");
+                    namehead = document.createElement("td");
+                    namehead.textContent = "Name";
+                    hrow.appendChild(namehead);
+                    codehead = document.createElement("td");
+                    codehead.textContent = "Code";
+                    hrow.appendChild(codehead);
+                    pricehead = document.createElement("td");
+                    pricehead.textContent = "Price";
+                    hrow.appendChild(pricehead);
+                    thead.appendChild(hrow);
+                    table.appendChild(thead);
+                    tbody = document.createElement("tbody");
+                    aucFullInfo.articles.forEach((article) => {
+                        let row, namecell, codecell, pricecell;
+                        row = document.createElement("tr");
+                        namecell = document.createElement("td");
+                        namecell.textContent = article.name;
+                        row.appendChild(namecell);
+                        codecell = document.createElement("td");
+                        codecell.textContent = article.article_id;
+                        row.appendChild(codecell);
+                        pricecell = document.createElement("td");
+                        pricecell.textContent = article.price;
+                        row.appendChild(pricecell);
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    par = document.createElement("p");
+                    let exp = aucFullInfo.auction.expiring_date;
+                    let expDate = new Date(Date.parse(exp));
+                    let log = sessionStorage.getItem("logDate");
+                    let logDate = new Date(Date.parse(log));
+                    let diffTime = timeDifference(expDate, logDate);
+                    par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                    anchor.appendChild(table);
+                    anchor.appendChild(par);
+                    self.closedContainer.appendChild(anchor);
+                });
+            } else{
+                let par = document.createElement("p");
+                par.textContent = "No closed auctions";
+                self.closedContainer.appendChild(par);
+            }
+
         }
     }
 
@@ -392,11 +466,8 @@
         this.sellPage = _sellPage;
 
         this.start = function () {
-            openAuctions = new AuctionList(document.getElementById("id_openAuctions"), true);
+            openAuctions = new AuctionLists(document.getElementById("id_openAuctions"), document.getElementById("id_closedAuctions"));
             openAuctions.show();
-
-            closedAuctions = new AuctionList(document.getElementById("id_closedAuctions"), false);
-            closedAuctions.show();
 
             createArticleWizard = new CreateArticleWizard(document.getElementById("id_createArticle"));
             createArticleWizard.show();
