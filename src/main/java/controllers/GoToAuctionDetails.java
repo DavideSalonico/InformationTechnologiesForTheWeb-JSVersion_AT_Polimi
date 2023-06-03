@@ -6,8 +6,11 @@ import DAO.OfferDAO;
 import DAO.UserDAO;
 import beans.Offer;
 import beans.User;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import utils.AuctionDetailsInfo;
 import utils.ConnectionHandler;
+import utils.LocalDateTimeTypeAdapter;
 import utils.Pair;
 
 import javax.servlet.ServletContext;
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -59,70 +63,57 @@ public class GoToAuctionDetails extends HttpServlet {
 			return;
 		}
 
+		List<Pair<Offer, String>> auctionOffers;
+
+		LinkedHashMap<Integer, String> users = new LinkedHashMap<>();
+
+		User awardedUser = null;
+
 		try {
-
-			List<Pair<Offer, String>> auctionOffers;
-
-			LinkedHashMap<Integer, String> users = new LinkedHashMap<>();
-
-			User awardedUser = null;
-
-			try {
-				auctionDetailsInfo = auctionDAO.getAuctionDetails(auctionId);
-				if (auctionDetailsInfo == null) {
-					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-					response.getWriter().println("auctionId is not valid");
-					return;
-				}
-			} catch (SQLException e) {
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				response.getWriter().println("Unable to access the database");
+			auctionDetailsInfo = auctionDAO.getAuctionDetails(auctionId);
+			if (auctionDetailsInfo == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("auctionId is not valid");
 				return;
 			}
-
-			try {
-				// WINNING OFFERS IS AT TOP, IF EXISTS
-				auctionOffers = offerDAO.getOffers(auctionId);
-
-				if(!auctionOffers.isEmpty()){
-					awardedUser = userDAO.getUser(auctionOffers.get(0).getFirst().getUser());
-					if(awardedUser != null){
-						// Removes the password from the object for security purposes
-						awardedUser.setPassword("");
-					}
-					auctionDetailsInfo.addOfferWinner(auctionOffers,awardedUser);
-				}
-
-			}catch(SQLException e) {
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				response.getWriter().println("Error accessing the database!");
-				return;
-			}
-
-
-			// Redirect to AuctionDetails
-			String path = "/WEB-INF/" + page;
-			ServletContext servletContext = getServletContext();
-			//final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-			//ctx.setVariable("auctionId", auctionId);
-			//ctx.setVariable("auction", auction);
-			//ctx.setVariable("article", articles);
-			//ctx.setVariable("frmtDeadline", frmtDeadline);
-			//ctx.setVariable("isExpired", isExpired);
-			//ctx.setVariable("offers", frmtAuctionOffers);
-			//ctx.setVariable("users", users);
-			//ctx.setVariable("maxAuctionOffer", maxAuctionOffer);
-			//ctx.setVariable("awardedUser", awardedUser);
-			//ctx.setVariable("imageMap", imageMap);
-			//templateEngine.process(path, ctx, response.getWriter());
 		} catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Error processing the servlet!");
+			response.getWriter().println("Unable to access the database");
+			return;
 		}
+
+		try {
+			// WINNING OFFERS IS AT TOP, IF EXISTS
+			auctionOffers = offerDAO.getOffers(auctionId);
+
+			if(!auctionOffers.isEmpty()){
+				awardedUser = userDAO.getUser(auctionOffers.get(0).getFirst().getUser());
+				if(awardedUser != null){
+					// Removes the password from the object for security purposes
+					awardedUser.setPassword("");
+				}
+				auctionDetailsInfo.addOfferWinner(auctionOffers,awardedUser);
+			}
+
+		}catch(SQLException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Error accessing the database!");
+			return;
+		}
+
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+				.create();
+		String json = gson.toJson(auctionDetailsInfo);
+
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().println(json);
+
 	}
 	
 
-	
 	public void destroy() {
 		try {
 			ConnectionHandler.closeConnection(connection);
