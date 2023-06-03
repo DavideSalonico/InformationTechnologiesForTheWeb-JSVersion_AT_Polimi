@@ -236,7 +236,7 @@
                     table.appendChild(thead);
                     tbody = document.createElement("tbody");
                     aucFullInfo.articles.forEach((article) => {
-                        let row, namecell, codecell, pricecell, par;
+                        let row, namecell, codecell, pricecell;
                         row = document.createElement("tr");
                         namecell = document.createElement("td");
                         namecell.textContent = article.name;
@@ -407,8 +407,9 @@
         }
     }
 
-    function CreateArticleWizard(_articleWizard){
-        this.articleWizard = _articleWizard;
+    function CreateArticleWizard(_formButton, _createAuctionDiv, _createAuctionWizard){
+        this.formButton = _formButton;
+        this.createAuctionWizard = _createAuctionWizard;
 
         this.show = function(){
             let self = this;
@@ -418,6 +419,32 @@
 
         this.update = function(){
             //TODO: Costruzione MarkUp
+        }
+
+        this.registerEvents = function() {
+            let self = this;
+            this.formButton.addEventListener('click', (e) => {
+                let form = e.target.closest("form");
+                if (form.checkValidity()) {
+                    let self = this;
+                    makeCall("POST", 'CreateArticle', form,
+                        function (req) {
+                            if (req.readyState === 4) {
+                                let message = req.responseText;
+                                if (req.status === 200) {
+                                    //self.createAuctionWizard.show(); //TODO: implementare
+                                } else if (req.status === 403) {
+                                    window.location.href = req.getResponseHeader("Location"); //TODO: ???
+                                    window.sessionStorage.removeItem('username');
+                                } else {
+                                    self.alert.textContent = message;
+                                }
+                            }
+                        })
+                } else {
+                    form.reportValidity();
+                }
+            });
         }
     }
 
@@ -426,12 +453,10 @@
 
         this.show = function(){
             let self = this;
-            //TODO : AJAX
             self.update();
         }
 
         this.update = function(){
-            //TODO: Costruzione MarkUp
         }
     }
 
@@ -469,11 +494,11 @@
             openAuctions = new AuctionLists(document.getElementById("id_openAuctions"), document.getElementById("id_closedAuctions"));
             openAuctions.show();
 
-            createArticleWizard = new CreateArticleWizard(document.getElementById("id_createArticle"));
-            createArticleWizard.show();
-
             createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_createAuction"));
             createAuctionWizard.show();
+
+            createArticleWizard = new CreateArticleWizard(document.getElementById("id_createArticle"), createAuctionWizard);
+            createArticleWizard.registerEvents();
         };
 
         this.reset = function () {

@@ -98,9 +98,7 @@ public class CreateArticle extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to insert a new article into database");
 			return; 
 		}
-
-		String path = getServletContext().getContextPath() + "/GoToSell";
-		response.sendRedirect(path);
+		response.setStatus(HttpServletResponse.SC_OK);
 	}
 	
 	public void destroy() {

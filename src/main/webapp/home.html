@@ -44,25 +44,14 @@
             <!-- CREATE ARTICLE -->
             <div id="id_createArticle" class="row third-row form">
                 <h2>CREATE A NEW ARTICLE</h2>
-                <form method="post" action="@{/CreateArticle}" enctype="multipart/form-data">
-                    <div>
-                        <label for="name">Article's Name:</label>
-                        <input type="text" name="name" id="name" min="4" max="255" required>
-                    </div>
-                    <div>
-                        <label for="description">Description:</label>
-                        <textarea name="description" id="description" rows="4" cols="50" minlength="10" maxlength="255" placeholder=" ..." spellcheck="false" required></textarea>
-                    </div>
-                    <div>
-                        <label for="price">Price:</label>
-                        <input type="number" name="price" id="price" min="1" step="1" max="1000000000" required>
-                        <span> &euro;</span>
-                    </div>
-                    <div>
-                        <label for="image">Select an image:</label>
-                        <input type="file" accept="image/*" name="image" id="image"  required>
-                    </div>
-                    <button name="article-submit" type="submit">Create Article</button>
+                <form enctype="multipart/form-data">
+                    <fieldset>
+                        Article Name: <input type="text" name="name" id="name" min="4" max="255" required> <br>
+                        Description: <textarea name="description" id="description" rows="4" cols="50" minlength="10" maxlength="255" placeholder=" ..." spellcheck="false" required></textarea><br>
+                        Price: <input type="number" name="price" id="price" min="1" step="1" max="1000000000" required><span> &euro;</span><br>
+                        Select an image: <input type="file" accept="image/*" name="image" id="image"  required><br>
+                        <input type="button" value="Create Article" id="id_createArticleButton">
+                    </fieldset>
                 </form>
             </div>
             <!-- CREATE AUCTION -->
@@ -70,28 +59,28 @@
                 <h2>CREATE A NEW AUCTION</h2>
 
                 <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
-                <form method="GET" action="#">
+                <form method="" action="">
 
                     <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
-                    <input type="hidden"  each="article : ${articlesSelected}" value="${article.article_id}" name="alreadySelected">
+                    <input type="hidden">
                     <div style="display: flex;"> <!-- Flexbox per allign the two divs to insert articles -->
                         <div style="flex: 1;">
                             <div if="${not articles.isEmpty()}">
                                 <label for="articleSelected">Article</label>
                                 <select name="articleSelected" id="articleSelected" >
                                     <!-- Shows all the articles created by the client not yet assigned to any auction -->
-                                    <option each="article : ${articles}" value="${article.article_id}" text="${article.name}"></option>
+                                    <option ></option>
                                 </select><br/>
-                                <button type="submit">Add to auction</button>
+                                <button>Add to auction</button>
                             </div>
-                            <div unless="${not articles.isEmpty()}">
+                            <div>
                                 <!-- Static version of the page -->
                                 <p>First of all, create some new ARTICLES !</p>
                             </div>
                         </div>
 
                         <!-- Box that shows the client which articles he is adding to the auction during creation -->
-                        <div style="flex: 1;" if="${!articlesSelected.isEmpty()} ">
+                        <div style="flex: 1;">
                             <h2>List of Articles selected :</h2>
                             <table>
                                 <thead>
@@ -106,14 +95,14 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div style="flex: 1;" unless="${!articlesSelected.isEmpty()}">
+                        <div style="flex: 1;" >
                             <p>NO ARTICLES SELECTED !</p>
                         </div>
                     </div>
                 </form>
 
                 <!-- Form that triggers the doPost () of the CreateAuction servlet, takes as input all the attributes of an auction and creates it -->
-                <form action="#" action="@{/CreateAuction}" method="post" enctype="multipart/form-data">
+                <form action="#" action="" method="" enctype="multipart/form-data">
                     <div>
                         <label for="minimum_raise"> Minimum Raise:</label>
                         <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required>
@@ -133,7 +122,6 @@
         <!-- Page PURCHASE -->
         <div id="id_purchasePage">
             <div>
-
                 <!-- SEARCH FORM -->
                 <div class="row first-row form">
                     <h2>Search with a keyword</h2>
