@@ -52,7 +52,7 @@ public class CreateAuction extends HttpServlet {
     private boolean checkDatetime(LocalDateTime deadline)
     {
     	// Checks if the datetime provided by the user is after the current one
-		return deadline.isAfter(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+		return !deadline.isAfter(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
 	}
     
 	
@@ -72,17 +72,17 @@ public class CreateAuction extends HttpServlet {
 			}
 			minimum_raise = Integer.parseInt(request.getParameter("minimum_raise"));
 			if (minimum_raise < 1 || minimum_raise > 1000000) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Minumum raise must be between 1 and 1000000");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Minimum raise must be between 1 and 1000000");
 				return;
 			}
 			creator = (((User) request.getSession().getAttribute("user")).getUser_id());
 
-			String [] stringheAppoggio = request.getParameterValues("articlesSelected" );
-			if( stringheAppoggio == null ) {
+			String[] tmpString = request.getParameterValues("articlesSelected" );
+			if( tmpString == null ) {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No articles selected to add to the auction");
 				return;
 			}
-			for (String s : stringheAppoggio) {
+			for (String s : tmpString) {
 				articlesToAdd.add(Integer.parseInt(s));
 			}
 
@@ -104,9 +104,7 @@ public class CreateAuction extends HttpServlet {
 			return;
 		}
 
-		String path = getServletContext().getContextPath() + "/GoToSell";
-		response.sendRedirect(path);
-
+		response.setStatus(HttpServletResponse.SC_OK);
 	}
 	
 

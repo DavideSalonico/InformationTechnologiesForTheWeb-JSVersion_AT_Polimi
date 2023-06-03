@@ -57,11 +57,11 @@
             <!-- CREATE AUCTION -->
             <div id="id_createAuction" class="row fourth-row form" style="display: flex; flex-direction: column">
                 <h2 style="flex: 0;">CREATE A NEW AUCTION</h2>
-                <div id="id_articleSelector" style="flex: 1;">
+                <div style="flex: 1;">
                     <h3>Choose the articles to add to the auction</h3>
                     <form>
                         <fieldset>
-                            <select>
+                            <select id="id_articleSelector">
 
                             </select>
                             <input type="button" value="Add to Auction" id="id_addToAuctionButton">
@@ -78,7 +78,7 @@
                     <fieldset>
                         Minimum Raise: <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required><span> &euro;</span><br>
                         Expiring Date: <input type="datetime-local" name="expiring_date" id="expiring_date" placeholder="yyyy-MM-ddTHH:mm" required><br>
-                        <input type="hidden"  name="articlesSelected">
+                        <input id="id_articleSelectedHiddenInput" type="hidden"  name="articlesSelected">
                         <input value="Create Auction" type="button" id="id_createAuctionButton">
                     </fieldset>
                 </form>
@@ -137,14 +137,13 @@
         <!-- Page AUCTIONDETAILS -->
         <div id="id_auctionDetailsPage" >
             <div class="row first-row details">
-                <h2 if="${auction == null}">INFORMATIONS</h2>
-                <p if="${auction == null}">User did not create the auction or user does not exists</p>
-
+                <h2>INFORMATIONS</h2>
+                <p>User did not create the auction or user does not exists</p>
                 <!-- LIST OF ARTICLES -->
-                <section if="${auction != null}">
-                    <div >
+                <section>
+                    <div>
                         <h2 id="dtl-articles">List of Articles contained by auction</h2>
-                        <block if="${not article.isEmpty()}">
+                        <block>
                             <table>
                                 <thead>
                                 <tr>
@@ -154,18 +153,14 @@
                                     <th>Description</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                    <tr each="item : ${article}">
-                                        <!-- Article Content-->
-                                    </tr>
+                                <tbody id="id_articleDetailsTBody">
                                 </tbody>
                             </table>
                         </block>
-                        <p id="noArticleAvailable">Nessun articolo disponibile</p>
                         <!--INFO about auction-->
-                        <p><strong>Prezzo iniziale: </strong> &euro;</p>
-                        <p><strong>Rialzo minimo: </strong> &euro;</p>
-                        <p><strong>Scadenza: </strong></p>
+                        <p id="id_detailsPrezzoIniziale"><strong>Prezzo iniziale: </strong> &euro;</p>
+                        <p id="id_detailsMinimumRaise"><strong>Rialzo minimo: </strong> &euro;</p>
+                        <p id="id_detailsExpiringTime"><strong>Scadenza: </strong></p>
                     </div>
 
                     <div if="${!auction.isOpen() and awardedUser == null}">
@@ -175,22 +170,22 @@
                         <!-- Add a button to close the auction -->
                     </div>
 
-                    <div id=""if="${!auction.isOpen() and awardedUser != null}">
+                    <div>
                         <hr>
                         <h2 id="dtl-infoAwarded">Winner informations</h2>
-                        <p><strong>Name: </strong><span text="${awardedUser.username}">name 1</span></p>
-                        <p><strong>Offer: </strong><span text="${#numbers.formatInteger(maxAuctionOffer.price,1,'POINT')}">Offer: offer 1</span> &euro;</p>
-                        <p><strong>Address: </strong><span text="${awardedUser.address}">address 1</span></p>
+                        <p><strong>Name: </strong><span></span></p>
+                        <p><strong>Offer: </strong><span></span> &euro;</p>
+                        <p><strong>Address: </strong><span ></span></p>
                     </div>
                 </section>
             </div>
 
             <!-- LIST OF OFFERS -->
-            <div class="row second-row offers-list" remove="${auction == null or !auction.isOpen()} ? all">
+            <div class="row second-row offers-list">
                 <section class="mid-col scrollable">
                     <h2 id="dtl-offers">OFFERS</h2>
-                    <p if="${offers == null or offers.isEmpty()}">Non esiste alcuna offerta al momento!</p>
-                    <table remove="${offers == null or offers.isEmpty()} ? all">
+                    <p>Non esiste alcuna offerta al momento!</p>
+                    <table>
                         <thead>
                         <tr>
                             <th class="tbl-val tbl-name">Nome</th>
@@ -202,7 +197,7 @@
                             <!-- LIST OF OFFERS-->
                         </tbody>
                     </table>
-                    <a class="button-link" href="#" if="${details == 1 and !isExpired }" href="@{CloseAuction(auctionId= ${auction.auction_id})}">
+                    <a class="button-link">
                         <button>Close auction</button>
                     </a>
 
@@ -216,10 +211,10 @@
 
                 <!-- INFO ABOUT AUCTION (articles etc) -->
                 <div class="row first-row details">
-                    <h2 if="${auction == null or isExpired}">Informations</h2>
-                    <p if="${auction == null}">Selected auction does not exists</p>
-                    <p if="${isExpired}">Auction for selected article is expired</p>
-                    <section if="${auction != null and not isExpired}">
+                    <h2>Informations</h2>
+                    <p>Selected auction does not exists</p>
+                    <p >Auction for selected article is expired</p>
+                    <section >
                         <div>
                             <h2>List of Articles contained by auction</h2>
                             <block th:if="${not article.isEmpty()}">
@@ -237,18 +232,18 @@
                                     </tbody>
                                 </table>
                             </block>
-                            <p unless="${not article.isEmpty()}">Nessun articolo disponibile</p>
+                            <p>Nessun articolo disponibile</p>
                             <!--INFO about auction(price, raise, expiring)-->
                         </div>
                     </section>
                 </div>
 
                 <!-- LIST OF OFFERS -->
-                <div class="row second-row offers-list" if="${auction != null and not isExpired}">
+                <div class="row second-row offers-list">
                     <section class="mid-col scrollable" >
                         <h2 >OFFERS</h2>
-                        <p if="${offers == null or offers.isEmpty()}">Non esiste alcuna offerta al momento!</p>
-                        <table remove="${offers == null or offers.isEmpty()} ? all">
+                        <p >Non esiste alcuna offerta al momento!</p>
+                        <table >
                             <thead>
                             <tr>
                                 <th class="tbl-val tbl-name">Nome</th>
@@ -261,7 +256,7 @@
                             </tr>
                             </tbody>
                         </table>
-                        <a class="button-link" href="#" if="${details == 1 and !isExpired }" href="@{CloseAuction(auctionId= ${auction.auction_id})}">
+                        <a class="button-link">
                             <button>Close auction</button>
                         </a>
                     </section>
@@ -270,12 +265,12 @@
                 <!-- FORM FOR OFFER -->
                 <div id="offerForm"class="row third-row form" >
                     <h2>New Offer</h2>
-                    <form action="#" action="@{/MakeOffer}" method="post">
+                    <form action="" method="">
                         <div>
                             <label for="offer">Value:</label>
                             <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" min="${min}" required>
                             <span>&euro;</span>
-                            <input type="hidden" name="auctionId" value="${auction.auction_id}">
+                            <input type="hidden" name="auctionId">
                         </div>
                         <button name="offer-submit" type="submit">Confirm</button>
                     </form>

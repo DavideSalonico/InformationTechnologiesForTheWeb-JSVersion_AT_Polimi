@@ -143,7 +143,10 @@
             auctionList.forEach((aucFullInfo) => {
                 let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                 anchor = document.createElement("a");
-                anchor.href = "";
+                anchor.addEventListener("click", function(event){
+                    event.preventDefault();
+                    self.orchestrator.renderOffers(aucFullInfo.auction);
+                });
                 table = document.createElement("table");
                 thead = document.createElement("thead");
                 hrow = document.createElement("tr");
@@ -303,7 +306,10 @@
                 openAuctions.forEach((aucFullInfo) => {
                     let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                     anchor = document.createElement("a");
-                    anchor.href = "";
+                    anchor.addEventListener("click", function(event){
+                        event.preventDefault();
+                        self.orchestrator.renderAuctionDetails(aucFullInfo.auction);
+                    });
                     table = document.createElement("table");
                     thead = document.createElement("thead");
                     hrow = document.createElement("tr");
@@ -356,7 +362,10 @@
                 closedAuctions.forEach((aucFullInfo) => {
                     let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                     anchor = document.createElement("a");
-                    anchor.href = "";
+                    anchor.addEventListener("click", function(event){
+                        event.preventDefault();
+                        self.orchestrator.renderAuctionDetails(aucFullInfo.auction);
+                    });
                     table = document.createElement("table");
                     thead = document.createElement("thead");
                     hrow = document.createElement("tr");
@@ -407,19 +416,9 @@
         }
     }
 
-    function CreateArticleWizard(_formButton, _createAuctionDiv, _createAuctionWizard){
+    function CreateArticleWizard(_formButton, createAuctionWizard){
         this.formButton = _formButton;
-        this.createAuctionWizard = _createAuctionWizard;
-
-        this.show = function(){
-            let self = this;
-            //TODO : AJAX
-            self.update();
-        }
-
-        this.update = function(){
-            //TODO: Costruzione MarkUp
-        }
+        this.createAuctionWizard = createAuctionWizard;
 
         this.registerEvents = function() {
             let self = this;
@@ -432,7 +431,7 @@
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
-                                    //self.createAuctionWizard.show(); //TODO: implementare
+                                    self.createAuctionWizard.show();
                                 } else if (req.status === 403) {
                                     window.location.href = req.getResponseHeader("Location"); //TODO: ???
                                     window.sessionStorage.removeItem('username');
@@ -448,6 +447,15 @@
         }
     }
 
+    function Article(article_id, name, description, image, price, auction_id){
+        this.article_id = article_id;
+        this.name = name;
+        this.description = description;
+        this.image = image;
+        this.price = price;
+        this.auction_id = auction_id;
+    }
+
     function CreateAuctionWizard(_addArticleToAuctionButton, _createAuctionButton){
         this.addArticleToAuctionButton = _addArticleToAuctionButton;
         this.createAuctionButton = _createAuctionButton;
@@ -456,12 +464,23 @@
 
         this.show = function(){
             let self = this;
+            let listDiv = document.getElementById("id_selectedArticlesList");
+            listDiv.innerHTML = "";
+            let title = document.createElement("h3");
+            title.textContent = "Selected Articles";
+            listDiv.appendChild(title);
+            let par = document.createElement("p");
+            par.textContent = "No articles selected yet!";
+            listDiv.appendChild(par);
             makeCall("GET", 'GetAvailableArticles', null,
                 cback = function (req) {
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
-                            self.availableArticles = JSON.parse(message);
+                            let arts = JSON.parse(message);
+                            arts.forEach((art) => {
+                                self.availableArticles.push(art);
+                            });
                             self.update();
                         } else if (req.status === 403) {
                             window.location.href = req.getResponseHeader("Location");
@@ -475,16 +494,16 @@
 
         this.update = function(){
             if(this.availableArticles.length > 0){
-                availableArticles.forEach((article) => {
-                    let select = addArticleToAuctionButton.closest("select");
+                for(let i = 0; i < this.availableArticles.length; i++){
+                    let select = document.getElementById("id_articleSelector");
                     let opt = document.createElement("option");
-                    opt.value = article.article_id;
-                    opt.textContent = article.name;
+                    opt.value = this.availableArticles[i].article_id;
+                    opt.textContent = this.availableArticles[i].name;
                     select.appendChild(opt);
-                });
+                }
             }
             else{
-                let div = addArticleToAuctionButton.closest("div");
+                let div = this.addArticleToAuctionButton.closest("div");
                 let par = document.createElement("p");
                 par.textContent = "First of all, insert an article";
                 div.appendChild(par);
@@ -530,22 +549,39 @@
         }
 
         this.registerEvents = function(){
-            this.addArticleToAuctionButton.addEventListener('click', (e) => {
+            let self = this;
+            self.addArticleToAuctionButton.addEventListener('click', (e) => {
                 let form = e.target.closest("form");
-                let articleToAdd = form.querySelector("input[name='articleToAdd']").value;
-                this.availableArticles.remove(articleToAdd);
-                this.selectedArticles.push(articleToAdd);
+                let articleSelector = document.getElementById("id_articleSelector");
+                let articleToAdd_id = articleSelector.value;
+                let articleToAdd = self.availableArticles.filter((el) => { return el.article_id == articleToAdd_id; })[0];
+                console.log(articleToAdd);
+                self.availableArticles = self.availableArticles.filter((el) => { return el.article_id != articleToAdd_id; });
+                for (let i = 0; i < articleSelector.options.length; i++) {
+                    if (articleSelector.options[i].value === articleToAdd_id) {
+                        articleSelector.options[i].remove(i);
+                        break;
+                    }
+                }
+                self.selectedArticles.push(articleToAdd);
+                /*
                 let formfieldAuc = this.createAuctionButton.closest("fieldset");
-                let opt = document.createElement("option");
-                opt.style.display = "none";
-                opt.value = articleToAdd.article_id;
-                opt.textContent = articleToAdd.name;
-                formfieldAuc.appendChild(opt);
+                let input = document.createElement("input");
+                input.style.display = "none";
+                input.value = articleToAdd.article_id;
+                input.textContent = articleToAdd.name;
+                formfieldAuc.appendChild(input);
+                 */
                 this.update();
             });
 
-            this.createAuctionButton.addEventListener('click', (e) => {
+            self.createAuctionButton.addEventListener('click', (e) => {
                 let form = e.target.closest("form");
+                let artIds = [];
+                self.selectedArticles.forEach((art) => {
+                    artIds.push(art.article_id);
+                });
+                document.getElementById("id_articleSelectedHiddenInput").value = artIds;
                 if (form.checkValidity()) {
                     let self = this;
                     makeCall("POST", 'CreateAuction', form,
@@ -555,7 +591,7 @@
                                 if (req.status === 200) {
                                     self.availableArticles = [];
                                     self.selectedArticles = [];
-                                    self.update();
+                                    self.show();
                                 }
                                 else if (req.status === 403) {
                                     window.location.href = req.getResponseHeader("Location");
@@ -571,6 +607,34 @@
                     form.reportValidity();
                 }
             });
+        }
+    }
+
+    function OfferList(_offerList) {
+        this.offerList = _offerList;
+
+        this.show = function () {
+            makeCall("GET", "GetOffers", null,
+                cback = function (req) {
+                    if (req.readyState === 4) {
+                        let message = req.responseText;
+                        if (req.status === 200) {
+                            let offers = JSON.parse(req.responseText);
+                            //TODO
+                        } else if (req.status === 403) {
+                            window.location.href = req.getResponseHeader("Location");
+                            window.sessionStorage.removeItem('username');
+                        } else {
+                            self.alert.textContent = message;
+                        }
+                    }
+                });
+        }
+    }
+
+    function OfferInfo(){
+        this.show = function(){
+            //TODO
         }
     }
 
@@ -608,10 +672,11 @@
             openAuctions = new AuctionLists(document.getElementById("id_openAuctions"), document.getElementById("id_closedAuctions"));
             openAuctions.show();
 
-            createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_createAuction"));
+            createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_addToAuctionButton"), document.getElementById("id_createAuctionButton"));
             createAuctionWizard.show();
+            createAuctionWizard.registerEvents();
 
-            createArticleWizard = new CreateArticleWizard(document.getElementById("id_createArticle"), createAuctionWizard);
+            createArticleWizard = new CreateArticleWizard(document.getElementById("id_createArticleButton"), createAuctionWizard);
             createArticleWizard.registerEvents();
         };
 
@@ -628,21 +693,25 @@
 
     function OffersPage(orchestrator, _offersPage) {
         let offersList;
+        let offerInfo;
         this.orchestrator = orchestrator;
         this.offersPage = _offersPage;
 
-        this.start = function () {
-            //offersList = new OffersList(document.getElementById("id_offersList"));
-            //offersList.show();
-        };
 
         this.reset = function () {
             let self = this;
             self.offersPage.style.display = "none";
         }
 
-        this.show = function () {
+        this.start = function () {
             let self = this;
+
+            offersList = new OfferList(document.getElementById("id_offersList"));
+            offersList.show();
+
+            offerInfo = new OfferInfo(document.getElementById("id_offerInfo"));
+            offerInfo.show();
+
             self.offersPage.style.display = "block";
         }
     }
@@ -721,20 +790,20 @@
             auctionDetailsPage.reset();
         };
 
-        this.renderOffers = function(){
+        this.renderOffers = function(auc){
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
-            offersPage.show();
+            offersPage.show(auc);
             auctionDetailsPage.reset();
         }
 
-        this.renderAuctionDetails = function(){
+        this.renderAuctionDetails = function(auc){
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
             offersPage.reset();
-            auctionDetailsPage.show();
+            auctionDetailsPage.show(auc);
         }
     }
 }
