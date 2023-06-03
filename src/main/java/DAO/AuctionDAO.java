@@ -102,7 +102,6 @@ public class AuctionDAO {
 					auctionFullList.add(new AuctionFullInfo(auction, articles, null));
 					prev_auction_id = auction.getAuction_id();
 				}
-
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
