@@ -14,6 +14,28 @@
         }
     }, false);
 
+    function DiffDate(days, hours, minutes){
+        this.days = days;
+        this.hours = hours;
+        this.minutes = minutes;
+    }
+
+    function timeDifference(deadline, currDate){
+        deadline.setSeconds(0);
+        deadline.setMilliseconds(0);
+        currDate.setSeconds(0);
+        currDate.setMilliseconds(0);
+        var millisecondsDiff = deadline - currDate;
+        const millisecondsInDay = 1000 * 60 * 60 * 24;
+        const millisecondsInHour = 1000 * 60 * 60;
+        const millisecondsInMinute = 1000 * 60;
+        const days = Math.floor(millisecondsDiff / millisecondsInDay);
+        const hours = Math.floor((millisecondsDiff % millisecondsInDay) / millisecondsInHour);
+        const minutes = Math.floor((millisecondsDiff % millisecondsInHour) / millisecondsInMinute);
+
+        return new DiffDate(days, hours, minutes);
+    }
+
     // Constructors of view components
     function LoginBanner(_username, _bannercontainer, _messagecontainer){
         this.username = _username;
@@ -83,7 +105,8 @@
                             let message = req.responseText;
                             if(req.status === 200){
                                 let filteredAuctions = JSON.parse(req.responseText);
-                                self.searchedAuctionContainer.update(filteredAuctions);
+                                let currDate = new Date();
+                                self.searchedAuctionContainer.update(filteredAuctions, currDate);
                                 //self.reset(); // to delete the inserted key in the form
                             }
                             else if(req.status === 403){
@@ -111,7 +134,7 @@
             this.searchedAuctionsDiv.innerHTML = "";
         }
 
-        this.update = function(auctionList){
+        this.update = function(auctionList, currDate){
             let self = this;
             self.searchedAuctionsDiv.innerHTML = "";
             let title = document.createElement("h1");
@@ -151,12 +174,13 @@
                     tbody.appendChild(row);
                 });
                 table.appendChild(tbody);
-                //par = document.createElement("p");
-                //let diffTime = new Date();
-                //diffTime = auction.expiring_date - datetime;
-                //par.textContent = "Remaining time: " + diffTime;
+                par = document.createElement("p");
+                let exp = aucFullInfo.auction.expiring_date;
+                let expDate = new Date(Date.parse(exp));
+                let diffTime = timeDifference(expDate, currDate);
+                par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
                 anchor.appendChild(table);
-                //anchor.appendChild(par);
+                anchor.appendChild(par);
                 self.searchedAuctionsDiv.appendChild(anchor);
             });
             self.searchedAuctionsDiv.style.display = "block";
@@ -168,6 +192,7 @@
 
         this.show = function(){
             let self = this;
+            /*
             makeCall("GET", "", null,
                 function(req){
                     if (req.readyState === 4) {
@@ -184,6 +209,7 @@
                         }
                     }
                 });
+             */
         };
 
         this.update = function(wonOffers){
