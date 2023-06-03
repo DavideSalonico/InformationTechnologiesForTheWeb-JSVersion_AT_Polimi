@@ -26,4 +26,15 @@ public class AuctionFullInfo {
     	article.setImage(null);
     	this.articles.add(article);
     }
+
+    public AuctionFullInfo(int auction_id, List<Article> articles, Offer maxOffer ){
+        this.auction = new Auction();
+        this.auction.setAuction_id(auction_id);
+        this.articles = new ArrayList<>();
+        for(Article article : articles) {
+            article.setImage(null);
+            this.articles.add(article);
+        }
+        this.maxOffer = maxOffer;
+    }
 }
