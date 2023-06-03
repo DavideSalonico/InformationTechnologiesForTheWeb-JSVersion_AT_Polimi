@@ -14,6 +14,7 @@
             switch (x.status) {
               case 200:
             	sessionStorage.setItem('username', message);
+                sessionStorage.setItem('logDate', new Date().toString());
                 window.location.href = "home.html";
                 break;
               case 400: // bad request

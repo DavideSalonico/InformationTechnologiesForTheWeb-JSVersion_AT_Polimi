@@ -2,14 +2,13 @@ package DAO;
 
 import beans.Article;
 import beans.Auction;
+import beans.Offer;
 import utils.AuctionFullInfo;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AuctionDAO {
 	private Connection connection;
@@ -177,6 +176,7 @@ public class AuctionDAO {
 		return auctions;
 	}
 
+	/*
 	public LinkedHashMap<Auction, List<Article>> getAuctionsByUser(int user_id) throws SQLException{
 		LinkedHashMap<Auction, List<Article>> userAuctions = new LinkedHashMap<>();
 		List<Auction> auctions = new ArrayList<>();
@@ -214,6 +214,57 @@ public class AuctionDAO {
 			}
 		}
 		return userAuctions;
+	}
+	*/
+
+	public List<AuctionFullInfo> getAuctionsByUser(int user_id) throws SQLException{
+		List<AuctionFullInfo> auctions = new ArrayList<>();
+		try {
+			pstatement = connection.prepareStatement("SELECT *\n" +
+					"FROM auction au\n" +
+					"JOIN article ar ON au.auction_id = ar.auction_id\n" +
+					"LEFT JOIN (\n" +
+					"    SELECT o1.*\n" +
+					"    FROM offer o1\n" +
+					"    INNER JOIN (\n" +
+					"        SELECT auction, MAX(price) AS max_price\n" +
+					"        FROM offer\n" +
+					"        GROUP BY auction\n" +
+					"    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price\n" +
+					") o ON o.auction = au.auction_id\n" +
+					"WHERE creator = ?;");
+			pstatement.setInt(1, user_id);
+			result = pstatement.executeQuery();
+			int prev_auction_id = -1;
+			while(result.next()) {
+				if(result.getInt("auction_id") != prev_auction_id){
+					List<Article> articles = new ArrayList<>();
+					articles.add(resultToArticle(result));
+					auctions.add(new AuctionFullInfo(resultToAuction(result), articles, resultToOffer(result)));
+					prev_auction_id = result.getInt("auction_id");
+				}
+				else{
+					auctions.get(auctions.size()-1).addArticle(resultToArticle(result));
+				}
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+
+		} finally {
+			try {
+				result.close();
+			} catch (Exception e1) {
+				throw new SQLException(e1);
+			}
+			try {
+				pstatement.close();
+			} catch (Exception e2) {
+				throw new SQLException(e2);
+			}
+		}
+		return auctions;
 	}
 	
 	public Auction getAuction(int auction_id) throws SQLException{
@@ -339,6 +390,18 @@ public class AuctionDAO {
 		article.setSold(result.getBoolean("sold"));
 
 		return article;
+	}
+
+	public Offer resultToOffer(ResultSet result) throws SQLException{
+		Offer offer = new Offer();
+		offer.setOffer_id(result.getInt("offer_id"));
+		offer.setAuction(result.getInt("auction"));
+		offer.setUser(result.getInt("user"));
+		offer.setPrice(result.getInt("price"));
+		Timestamp ldt = result.getTimestamp("time");
+		if(ldt != null)
+			offer.setTime(ldt.toLocalDateTime());
+		return offer;
 	}
 
 }
