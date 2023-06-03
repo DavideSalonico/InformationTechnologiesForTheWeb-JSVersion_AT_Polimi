@@ -1,6 +1,5 @@
 package controllers;
 
-import DAO.ArticleDAO;
 import DAO.AuctionDAO;
 import DAO.OfferDAO;
 import DAO.UserDAO;
@@ -24,7 +23,6 @@ import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @WebServlet("/GoToAuctionDetails")
@@ -35,7 +33,6 @@ public class GoToAuctionDetails extends HttpServlet {
 
 	private OfferDAO offerDAO;
 	private AuctionDAO auctionDAO;
-	private ArticleDAO articleDAO;
 	private UserDAO userDAO;
 	
 	public void init() throws ServletException {
@@ -44,7 +41,6 @@ public class GoToAuctionDetails extends HttpServlet {
 
 		offerDAO = new OfferDAO(connection);
 		auctionDAO = new AuctionDAO(connection);
-		articleDAO = new ArticleDAO(connection);
 		userDAO = new UserDAO(connection);
 	}
 
@@ -52,8 +48,9 @@ public class GoToAuctionDetails extends HttpServlet {
 			throws ServletException, IOException {
 
 		int auctionId;
-		AuctionDetailsInfo auctionDetailsInfo = null;
-
+		AuctionDetailsInfo auctionDetailsInfo;
+		List<Pair<Offer, String>> auctionOffers;
+		User awardedUser;
 
 		try{
 			auctionId = Integer.parseInt(request.getParameter("auctionId"));
@@ -63,11 +60,6 @@ public class GoToAuctionDetails extends HttpServlet {
 			return;
 		}
 
-		List<Pair<Offer, String>> auctionOffers;
-
-		LinkedHashMap<Integer, String> users = new LinkedHashMap<>();
-
-		User awardedUser = null;
 
 		try {
 			auctionDetailsInfo = auctionDAO.getAuctionDetails(auctionId);
