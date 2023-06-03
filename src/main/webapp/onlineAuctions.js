@@ -143,7 +143,7 @@
             auctionList.forEach((aucFullInfo) => {
                 let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                 anchor = document.createElement("a");
-                anchor.href = ""; //TODO: da aggiungere l'href
+                anchor.href = "";
                 table = document.createElement("table");
                 thead = document.createElement("thead");
                 hrow = document.createElement("tr");
@@ -192,8 +192,8 @@
 
         this.show = function(){
             let self = this;
-            /*
-            makeCall("GET", "", null,
+
+            makeCall("GET", "WonOffers", null,
                 function(req){
                     if (req.readyState === 4) {
                         let message = req.responseText;
@@ -209,15 +209,17 @@
                         }
                     }
                 });
-             */
         };
 
         this.update = function(wonOffers){
             let self = this;
-            /*
+            self.wonOfferContainer.innerHTML = "";
+            let title = document.createElement("h1");
+            title.textContent = "Won Offers";
+            self.wonOfferContainer.appendChild(title);
             if(wonOffers != null){
-                wonOffers.forEach(function(offer){
-                    let table, thead, hrow, namehead, codehead, pricehead;
+                wonOffers.forEach(function(aucFullInfo){
+                    let table, thead, hrow, namehead, codehead, pricehead, par1, par2;
                     table = document.createElement("table");
                     thead = document.createElement("thead");
                     hrow = document.createElement("tr");
@@ -233,26 +235,30 @@
                     thead.appendChild(hrow);
                     table.appendChild(thead);
                     tbody = document.createElement("tbody");
-                    let row, namecell, codecell, pricecell, par;
-                    row = document.createElement("tr");
-                    namecell = document.createElement("td");
-                    namecell.textContent = article.name;
-                    row.appendChild(namecell);
-                    codecell = document.createElement("td");
-                    codecell.textContent = article.code;
-                    row.appendChild(codecell);
-                    pricecell = document.createElement("td");
-                    pricecell.textContent = article.price;
-                    row.appendChild(pricecell);
-                    tbody.appendChild(row);
+                    aucFullInfo.articles.forEach((article) => {
+                        let row, namecell, codecell, pricecell, par;
+                        row = document.createElement("tr");
+                        namecell = document.createElement("td");
+                        namecell.textContent = article.name;
+                        row.appendChild(namecell);
+                        codecell = document.createElement("td");
+                        codecell.textContent = article.article_id;
+                        row.appendChild(codecell);
+                        pricecell = document.createElement("td");
+                        pricecell.textContent = article.price;
+                        row.appendChild(pricecell);
+                        tbody.appendChild(row);
+                    });
                     table.appendChild(tbody);
-                    par = document.createElement("p");
-                    par.textContent = "Maximum offer for this Auction: " + offer.price;
+                    par1 = document.createElement("p");
+                    par1.textContent = "Auction ID: " + aucFullInfo.auction.auction_id;
+                    par2 = document.createElement("p");
+                    par2.textContent = "Maximum offer for this Auction: " + aucFullInfo.maxOffer.price;
                     self.wonOfferContainer.appendChild(table);
-                    self.wonOfferContainer.appendChild(par)
+                    self.wonOfferContainer.appendChild(par1);
+                    self.wonOfferContainer.appendChild(par2);
                 })
             }
-            */
         }
     }
 
