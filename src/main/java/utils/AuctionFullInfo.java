@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuctionFullInfo {
-    Auction auction;
-    List<Article> articles;
-    Offer maxOffer;
+    private Auction auction;
+    private List<Article> articles;
+    private Offer maxOffer;
 
     public AuctionFullInfo(Auction auction, List<Article> articles, Offer maxOffer) {
         this.auction = auction;

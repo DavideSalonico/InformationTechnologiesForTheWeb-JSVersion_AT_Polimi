@@ -1,6 +1,7 @@
 package DAO;
 
 import beans.Offer;
+import utils.Pair;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,10 +22,10 @@ public class OfferDAO {
 		this.connection = conn;
 	}
 	
-	public List<Offer> getOffers(int auction_id) throws SQLException{
-		List<Offer> offers = new ArrayList<Offer>();
+	public List<Pair<Offer,String>> getOffers(int auction_id) throws SQLException{
+		List<Pair<Offer,String>> offers = new ArrayList<>();
 		try {
-			pstatement = connection.prepareStatement("SELECT * FROM offer WHERE auction = ?");
+			pstatement = connection.prepareStatement("SELECT * FROM offer JOIN user on user_id = user WHERE auction = ? ORDER BY price DESC");
 			pstatement.setInt(1, auction_id);
 			result = pstatement.executeQuery();
 			while(result.next()) {
@@ -32,9 +33,11 @@ public class OfferDAO {
 				off.setOffer_id(result.getInt("offer_id"));
 				off.setPrice(result.getInt("price"));
 				off.setTime(result.getTimestamp("time").toLocalDateTime());
-				off.setUser(result.getInt("user"));
+				//SO THE CLIENT CAN'T SEE THE USER ID
+				off.setUser(0);
 				off.setAuction(result.getInt("auction"));
-				offers.add(off);
+				String username = result.getString("username");
+				offers.add(new Pair<>(off,username));
 			}	
 		} catch(SQLException e) {
 			e.printStackTrace();
