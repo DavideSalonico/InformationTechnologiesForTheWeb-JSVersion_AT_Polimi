@@ -114,6 +114,9 @@
         this.update = function(auctionList){
             let self = this;
             self.searchedAuctionsDiv.innerHTML = "";
+            let title = document.createElement("h1");
+            title.textContent = "Auctions found: " + auctionList.length;
+            self.searchedAuctionsDiv.appendChild(title);
             auctionList.forEach((aucFullInfo) => {
                 let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                 anchor = document.createElement("a");
@@ -133,7 +136,7 @@
                 thead.appendChild(hrow);
                 table.appendChild(thead);
                 tbody = document.createElement("tbody");
-                aucFullInfo.articlesJsonized.forEach((article) => {
+                aucFullInfo.articles.forEach((article) => {
                     let row, namecell, codecell, pricecell;
                     row = document.createElement("tr");
                     namecell = document.createElement("td");
@@ -165,7 +168,6 @@
 
         this.show = function(){
             let self = this;
-            /*
             makeCall("GET", "", null,
                 function(req){
                     if (req.readyState === 4) {
@@ -179,18 +181,17 @@
                         }
                         else {
                             self.alert.textContent = message;
-
                         }
                     }
                 });
-             */
         };
 
         this.update = function(wonOffers){
             let self = this;
+            /*
             if(wonOffers != null){
                 wonOffers.forEach(function(offer){
-                    let table, thead, tbody, hrow, namehead, codehead, pricehead, row, namecell, codecell, pricecell, par;
+                    let table, thead, hrow, namehead, codehead, pricehead;
                     table = document.createElement("table");
                     thead = document.createElement("thead");
                     hrow = document.createElement("tr");
@@ -206,6 +207,7 @@
                     thead.appendChild(hrow);
                     table.appendChild(thead);
                     tbody = document.createElement("tbody");
+                    let row, namecell, codecell, pricecell, par;
                     row = document.createElement("tr");
                     namecell = document.createElement("td");
                     namecell.textContent = article.name;
@@ -224,6 +226,7 @@
                     self.wonOfferContainer.appendChild(par)
                 })
             }
+            */
         }
     }
 

@@ -78,8 +78,6 @@ public class Search extends HttpServlet {
 				.create();
 		String json = gson.toJson(auctionFullList);
 
-
-		//String json = new Gson().toJson(orderedFilteredMap);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(json);
