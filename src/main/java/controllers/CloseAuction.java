@@ -66,8 +66,8 @@ public class CloseAuction extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to close the auction. Try again later");
 		}
 
-		String path = getServletContext().getContextPath() + "/GoToSell";
-		response.sendRedirect(path);
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().println("Auction closed successfully");
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
