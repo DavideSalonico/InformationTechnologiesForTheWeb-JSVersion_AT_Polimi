@@ -448,15 +448,129 @@
         }
     }
 
-    function CreateAuctionWizard(_auctionWizard){
-        this.auctionWizard = _auctionWizard;
+    function CreateAuctionWizard(_addArticleToAuctionButton, _createAuctionButton){
+        this.addArticleToAuctionButton = _addArticleToAuctionButton;
+        this.createAuctionButton = _createAuctionButton;
+        this.availableArticles = [];
+        this.selectedArticles = [];
 
         this.show = function(){
             let self = this;
-            self.update();
+            makeCall("GET", 'GetAvailableArticles', null,
+                cback = function (req) {
+                    if (req.readyState === 4) {
+                        let message = req.responseText;
+                        if (req.status === 200) {
+                            self.availableArticles = JSON.parse(message);
+                            self.update();
+                        } else if (req.status === 403) {
+                            window.location.href = req.getResponseHeader("Location");
+                            window.sessionStorage.removeItem('username');
+                        } else {
+                            self.alert.textContent = message;
+                        }
+                    }
+                });
         }
 
         this.update = function(){
+            if(this.availableArticles.length > 0){
+                availableArticles.forEach((article) => {
+                    let select = addArticleToAuctionButton.closest("select");
+                    let opt = document.createElement("option");
+                    opt.value = article.article_id;
+                    opt.textContent = article.name;
+                    select.appendChild(opt);
+                });
+            }
+            else{
+                let div = addArticleToAuctionButton.closest("div");
+                let par = document.createElement("p");
+                par.textContent = "First of all, insert an article";
+                div.appendChild(par);
+            }
+
+            if(this.selectedArticles.length > 0){
+                let title, table, thead, tbody, hrow, namehead, codehead, pricehead, row, namecell, codecell, pricecell;
+                document.getElementById("id_selectedArticlesList").innerHTML = "";
+                title = document.createElement("h3");
+                title.textContent = "List of selected articles";
+                table = document.createElement("table");
+                thead = document.createElement("thead");
+                hrow = document.createElement("tr");
+                namehead = document.createElement("td");
+                namehead.textContent = "Name";
+                hrow.appendChild(namehead);
+                codehead = document.createElement("td");
+                codehead.textContent = "Code";
+                hrow.appendChild(codehead);
+                pricehead = document.createElement("td");
+                pricehead.textContent = "Price";
+                hrow.appendChild(pricehead);
+                thead.appendChild(hrow);
+                table.appendChild(thead);
+                tbody = document.createElement("tbody");
+                this.selectedArticles.forEach((article) => {
+                    row = document.createElement("tr");
+                    namecell = document.createElement("td");
+                    namecell.textContent = article.name;
+                    row.appendChild(namecell);
+                    codecell = document.createElement("td");
+                    codecell.textContent = article.article_id;
+                    row.appendChild(codecell);
+                    pricecell = document.createElement("td");
+                    pricecell.textContent = article.price;
+                    row.appendChild(pricecell);
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                document.getElementById("id_selectedArticlesList").appendChild(title);
+                document.getElementById("id_selectedArticlesList").appendChild(table);
+                }
+        }
+
+        this.registerEvents = function(){
+            this.addArticleToAuctionButton.addEventListener('click', (e) => {
+                let form = e.target.closest("form");
+                let articleToAdd = form.querySelector("input[name='articleToAdd']").value;
+                this.availableArticles.remove(articleToAdd);
+                this.selectedArticles.push(articleToAdd);
+                let formfieldAuc = this.createAuctionButton.closest("fieldset");
+                let opt = document.createElement("option");
+                opt.style.display = "none";
+                opt.value = articleToAdd.article_id;
+                opt.textContent = articleToAdd.name;
+                formfieldAuc.appendChild(opt);
+                this.update();
+            });
+
+            this.createAuctionButton.addEventListener('click', (e) => {
+                let form = e.target.closest("form");
+                if (form.checkValidity()) {
+                    let self = this;
+                    makeCall("POST", 'CreateAuction', form,
+                        function (req) {
+                            if (req.readyState === 4) {
+                                let message = req.responseText;
+                                if (req.status === 200) {
+                                    self.availableArticles = [];
+                                    self.selectedArticles = [];
+                                    self.update();
+                                }
+                                else if (req.status === 403) {
+                                    window.location.href = req.getResponseHeader("Location");
+                                    window.sessionStorage.removeItem('username');
+                                }
+                                else {
+                                    self.alert.textContent = message;
+                                }
+                            }
+                    });
+                }
+                else {
+                    form.reportValidity();
+                }
+            });
         }
     }
 

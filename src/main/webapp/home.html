@@ -55,67 +55,32 @@
                 </form>
             </div>
             <!-- CREATE AUCTION -->
-            <div id="id_createAuction" class="row fourth-row form">
-                <h2>CREATE A NEW AUCTION</h2>
+            <div id="id_createAuction" class="row fourth-row form" style="display: flex; flex-direction: column">
+                <h2 style="flex: 0;">CREATE A NEW AUCTION</h2>
+                <div id="id_articleSelector" style="flex: 1;">
+                    <h3>Choose the articles to add to the auction</h3>
+                    <form>
+                        <fieldset>
+                            <select>
 
-                <!-- Form that triggers the doGet () in the servlet / GoToSell, it will be used to re-render the page with the additions of the selected articles -->
-                <form method="" action="">
-
-                    <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
-                    <input type="hidden">
-                    <div style="display: flex;"> <!-- Flexbox per allign the two divs to insert articles -->
-                        <div style="flex: 1;">
-                            <div if="${not articles.isEmpty()}">
-                                <label for="articleSelected">Article</label>
-                                <select name="articleSelected" id="articleSelected" >
-                                    <!-- Shows all the articles created by the client not yet assigned to any auction -->
-                                    <option ></option>
-                                </select><br/>
-                                <button>Add to auction</button>
-                            </div>
-                            <div>
-                                <!-- Static version of the page -->
-                                <p>First of all, create some new ARTICLES !</p>
-                            </div>
-                        </div>
-
-                        <!-- Box that shows the client which articles he is adding to the auction during creation -->
-                        <div style="flex: 1;">
-                            <h2>List of Articles selected :</h2>
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>NAME</th>
-                                    <th>CODE</th>
-                                    <th>PRICE</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Table Content-->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div style="flex: 1;" >
-                            <p>NO ARTICLES SELECTED !</p>
-                        </div>
-                    </div>
-                </form>
+                            </select>
+                            <input type="button" value="Add to Auction" id="id_addToAuctionButton">
+                        </fieldset>
+                    </form>
+                </div>
+                <div id="id_selectedArticlesList" style="flex: 1;">
+                    <h3>List of article selected</h3>
+                    <p>No articles selected yet!</p>
+                </div>
 
                 <!-- Form that triggers the doPost () of the CreateAuction servlet, takes as input all the attributes of an auction and creates it -->
-                <form action="#" action="" method="" enctype="multipart/form-data">
-                    <div>
-                        <label for="minimum_raise"> Minimum Raise:</label>
-                        <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required>
-                        <span> &euro;</span>
-                    </div>
-                    <div>
-                        <label for="expiring_date">Expiring Date : </label>
-                        <input type="datetime-local" name="expiring_date" id="expiring_date" min="${ldt}" placeholder="yyyy-MM-ddTHH:mm" value="${ldt}" required>
-                    </div>
-
-                    <!-- Necessary to keep hidden parameters that keep track of all the selected articles, so as not to make them available again in the selection -->
-                    <input type="hidden"  each="article : ${articlesSelected}" value="${article.article_id}" name="articlesSelected" >
-                    <button type="submit">Create Auction</button>
+                <form action="" method="" enctype="multipart/form-data" style="flex: 2;">
+                    <fieldset>
+                        Minimum Raise: <input type="number" name="minimum_raise" id="minimum_raise" min="1" step="1" max="1000000" required><span> &euro;</span><br>
+                        Expiring Date: <input type="datetime-local" name="expiring_date" id="expiring_date" placeholder="yyyy-MM-ddTHH:mm" required><br>
+                        <input type="hidden"  name="articlesSelected">
+                        <input value="Create Auction" type="button" id="id_createAuctionButton">
+                    </fieldset>
                 </form>
             </div>
         </div>
