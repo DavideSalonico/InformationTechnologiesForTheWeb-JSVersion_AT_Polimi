@@ -19,7 +19,6 @@ import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/GetAuctionsList")
@@ -44,10 +43,9 @@ public class GetAuctionsList extends HttpServlet {
 	}
 
 	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-    {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		User user = (User) request.getSession().getAttribute("user");
-		List<AuctionFullInfo> finalUserAuctions = new ArrayList<>();
+		List<AuctionFullInfo> finalUserAuctions;
 
 		try {
 			finalUserAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());

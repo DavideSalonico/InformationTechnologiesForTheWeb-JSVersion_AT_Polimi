@@ -44,7 +44,7 @@ public class Search extends HttpServlet {
 		}
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		LocalDateTime currLdt = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
 		List<AuctionFullInfo> auctionFullList = null;
 
@@ -90,7 +90,7 @@ public class Search extends HttpServlet {
 		return key.matches("[a-zA-Z]+") && key.length() > 2 && key.length() < 63;
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		doGet(request, response);
 	}
 }

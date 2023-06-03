@@ -45,7 +45,7 @@ public class GoToAuctionDetails extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws IOException {
 
 		int auctionId;
 		AuctionDetailsInfo auctionDetailsInfo;

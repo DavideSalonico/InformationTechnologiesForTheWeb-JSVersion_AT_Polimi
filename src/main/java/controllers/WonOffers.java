@@ -46,7 +46,7 @@ public class WonOffers extends HttpServlet {
 		}
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		User user;
 		List<AuctionFullInfo> wonOffers = new ArrayList<>();
 
@@ -81,10 +81,6 @@ public class WonOffers extends HttpServlet {
 		response.getWriter().write(json);
 	}
 
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request, response);
-	}
 }
 
 
