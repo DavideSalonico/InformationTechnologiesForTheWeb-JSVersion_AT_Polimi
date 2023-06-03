@@ -4,7 +4,6 @@ import DAO.AuctionDAO;
 import DAO.OfferDAO;
 import beans.Article;
 import beans.Auction;
-import beans.Offer;
 import beans.User;
 import utils.AuctionFullInfo;
 import utils.ConnectionHandler;
@@ -20,7 +19,6 @@ import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
