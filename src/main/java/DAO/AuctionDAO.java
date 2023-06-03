@@ -50,35 +50,6 @@ public class AuctionDAO {
 		return auction_id;
 	}
 
-	public List<Auction> search(String keyword, LocalDateTime time) throws SQLException{
-		List<Auction> filteredAuctions = new ArrayList<>();
-		try{
-			pstatement = connection.prepareStatement("SELECT DISTINCT au.* FROM auction au JOIN article ar ON ar.auction_id = au.auction_id WHERE (ar.name LIKE ? OR ar.description LIKE ?) AND au.expiring_date > ? AND au.open = '1' ORDER BY au.expiring_date ASC");
-			pstatement.setString(1, "%" + keyword.toUpperCase() + "%");
-			pstatement.setString(2, "%" + keyword.toUpperCase() + "%");
-			pstatement.setObject(3, time);
-			result = pstatement.executeQuery();
-			while (result.next()) {
-				filteredAuctions.add(resultToAuction(result));
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-			throw new SQLException(e);
-		} finally {
-			try {
-				result.close();
-			} catch(Exception e1) {
-				throw new SQLException(e1);
-			}
-			try {
-				pstatement.close();
-			} catch(Exception e2) {
-				throw new SQLException(e2);
-			}
-		}
-		return filteredAuctions;
-	}
-
 	public List<AuctionFullInfo> getFiltered(String keyword, LocalDateTime time) throws SQLException{
 
 		List<AuctionFullInfo> auctionFullList = new ArrayList<>();
@@ -191,12 +162,8 @@ public class AuctionDAO {
 		int outcome = 0;
 		try {
 			pstatement = connection.prepareStatement("UPDATE auction SET open = 0 WHERE auction_id = ?");
-
-			// AGGIUNGERE ARTCLE POSTO A SOLD = 1
-
 			pstatement.setInt(1, auction_id);
 			pstatement.executeUpdate();
-			//FAI CONTROLLO
 			// If there is an affected row, it means that the auction has been closed
 			if(outcome > 0)
 				return true;
@@ -206,12 +173,13 @@ public class AuctionDAO {
 		} finally {
 			try {
 				pstatement.close();
-			} catch (Exception e1) {}
+			} catch (Exception e1) {
+				throw new SQLException(e1);}
 		}		
 		return false;
 	}
 
-	public void setInitialPrice(int auction_id, int initialPrice) throws SQLException{
+	public void setInitialPrice(int auction_id, int initialPrice) throws SQLException {
 		int outcome = -1;
 		try {
 			pstatement = connection.prepareStatement("UPDATE auction SET initial_price = ? WHERE auction_id = ?");
@@ -227,12 +195,13 @@ public class AuctionDAO {
 		} finally {
 			try {
 				pstatement.close();
-			} catch (Exception e1) {}
+			} catch (Exception e1) {
+				throw new SQLException(e1);
+			}
 		}
 	}
 
 	public boolean checkUserId(int auction_id, int user_id) throws SQLException {
-		int outcome = -1;
 		try {
 			pstatement = connection.prepareStatement("SELECT auction_id, creator FROM auction WHERE auction_id = ?");
 			pstatement.setInt(1, auction_id);
@@ -262,19 +231,20 @@ public class AuctionDAO {
 	public List<AuctionFullInfo> getAuctionsByUser(int user_id) throws SQLException{
 		List<AuctionFullInfo> auctions = new ArrayList<>();
 		try {
-			pstatement = connection.prepareStatement("SELECT *\n" +
-					"FROM auction au\n" +
-					"JOIN article ar ON au.auction_id = ar.auction_id\n" +
-					"LEFT JOIN (\n" +
-					"    SELECT o1.*\n" +
-					"    FROM offer o1\n" +
-					"    INNER JOIN (\n" +
-					"        SELECT auction, MAX(price) AS max_price\n" +
-					"        FROM offer\n" +
-					"        GROUP BY auction\n" +
-					"    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price\n" +
-					") o ON o.auction = au.auction_id\n" +
-					"WHERE creator = ?;");
+			pstatement = connection.prepareStatement("""
+					SELECT *
+					FROM auction au
+					JOIN article ar ON au.auction_id = ar.auction_id
+					LEFT JOIN (
+					    SELECT o1.*
+					    FROM offer o1
+					    INNER JOIN (
+					        SELECT auction, MAX(price) AS max_price
+					        FROM offer
+					        GROUP BY auction
+					    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price
+					) o ON o.auction = au.auction_id
+					WHERE creator = ?;""");
 			pstatement.setInt(1, user_id);
 			result = pstatement.executeQuery();
 			int prev_auction_id = -1;
@@ -329,7 +299,6 @@ public class AuctionDAO {
 		article.setArticle_creator(result.getInt("article_creator"));
 		article.setAuction_id(result.getInt("auction_id"));
 		article.setPrice(result.getInt("price"));
-		article.setSold(result.getBoolean("sold"));
 
 		return article;
 	}

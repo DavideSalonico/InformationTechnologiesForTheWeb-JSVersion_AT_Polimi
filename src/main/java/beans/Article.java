@@ -10,7 +10,6 @@ public class Article {
 	private int article_creator;
 	private int auction_id;
 	private int price;
-	private boolean sold;
 	
 	public int getArticleId() {
 		return this.article_id;
@@ -72,13 +71,6 @@ public class Article {
 		this.price = price;
 	}
 
-	public boolean isSold() {
-		return sold;
-	}
-
-	public void setSold(boolean sold) {
-		this.sold = sold;
-	}
 
 	@Override
 	public boolean equals (Object x){
