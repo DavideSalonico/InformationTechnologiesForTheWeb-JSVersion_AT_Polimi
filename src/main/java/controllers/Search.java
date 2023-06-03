@@ -2,8 +2,6 @@ package controllers;
 
 import DAO.ArticleDAO;
 import DAO.AuctionDAO;
-import beans.Article;
-import beans.Auction;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import utils.AuctionFullInfo;
@@ -21,8 +19,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @WebServlet("/Search")
@@ -30,7 +26,7 @@ public class Search extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
-	
+
 	AuctionDAO auctionDAO;
 	ArticleDAO articleDAO;
 
@@ -50,7 +46,7 @@ public class Search extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		LocalDateTime currLdt = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
-		LinkedHashMap<Auction,List<Article>> orderedFilteredMap= new LinkedHashMap<>();
+		List<AuctionFullInfo> auctionFullList = null;
 
 		try{
 			request.getSession().getAttribute("user");
@@ -69,7 +65,7 @@ public class Search extends HttpServlet {
 				return;
 			}
 			try {
-				orderedFilteredMap = auctionDAO.getFiltered(key, currLdt);
+				auctionFullList = auctionDAO.getFiltered(key, currLdt);
 			} catch (SQLException e) {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.getWriter().println("Error accessing the database!");
@@ -77,14 +73,10 @@ public class Search extends HttpServlet {
 			}
 		}
 
-		List<AuctionFullInfo> list = new ArrayList<>();
-		for(Auction a : orderedFilteredMap.keySet()){
-			list.add(new AuctionFullInfo(a, orderedFilteredMap.get(a), null));
-		}
 		Gson gson = new GsonBuilder()
 				.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
 				.create();
-		String json = gson.toJson(list);
+		String json = gson.toJson(auctionFullList);
 
 
 		//String json = new Gson().toJson(orderedFilteredMap);

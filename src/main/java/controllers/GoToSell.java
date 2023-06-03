@@ -6,8 +6,6 @@ import beans.Article;
 import beans.Auction;
 import beans.Offer;
 import beans.User;
-import com.google.gson.Gson;
-import utils.AuctionWrap;
 import utils.ConnectionHandler;
 
 import javax.servlet.ServletContext;
@@ -20,7 +18,9 @@ import java.io.IOException;
 import java.io.Serial;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @WebServlet("/GoToSell")
 public class GoToSell extends HttpServlet {
@@ -59,8 +59,6 @@ public class GoToSell extends HttpServlet {
     	LinkedHashMap<Auction, List<Article>> userClosedAuctions = new LinkedHashMap<>();
     	HashMap<Integer, Offer> maxOffers = new HashMap<>();
 
-		AuctionWrap auctionWrap;
-
 		try {
 
 			userAuctions = auctionDAO.getAuctionsByUser(user.getUser_id());
@@ -79,16 +77,12 @@ public class GoToSell extends HttpServlet {
 					maxOffers.put(auction.getAuction_id(), maxOffer);
 			}
 
-			auctionWrap = new AuctionWrap(userOpenAuctions, userClosedAuctions,maxOffers);
-
 		}catch(SQLException e){
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to recover articles in database");
 			return;
 		}
 
-		String json = new Gson().toJson(auctionWrap);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.getWriter().write(json);
     }
 }

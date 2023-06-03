@@ -82,8 +82,7 @@
                         if(req.readyState === 4){
                             let message = req.responseText;
                             if(req.status === 200){
-                                let filteredAuctions = new Map();
-                                filteredAuctions = JSON.parse(req.responseText);
+                                let filteredAuctions = JSON.parse(req.responseText);
                                 self.searchedAuctionContainer.update(filteredAuctions);
                                 //self.reset(); // to delete the inserted key in the form
                             }
@@ -112,13 +111,13 @@
             this.searchedAuctionsDiv.innerHTML = "";
         }
 
-        this.update = function(auctionMap){
-            let self = this, datetime = new Date();
-            //datetime = datetime.getVarDate();
-            Object.entries(auctionMap).forEach((auction, articles) => {
+        this.update = function(auctionList){
+            let self = this;
+            self.searchedAuctionsDiv.innerHTML = "";
+            auctionList.forEach((aucFullInfo) => {
                 let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                 anchor = document.createElement("a");
-                anchor.href = "";
+                anchor.href = ""; //TODO: da aggiungere l'href
                 table = document.createElement("table");
                 thead = document.createElement("thead");
                 hrow = document.createElement("tr");
@@ -134,14 +133,14 @@
                 thead.appendChild(hrow);
                 table.appendChild(thead);
                 tbody = document.createElement("tbody");
-                Object.entries(articles).forEach((article) => {
+                aucFullInfo.articlesJsonized.forEach((article) => {
                     let row, namecell, codecell, pricecell;
                     row = document.createElement("tr");
                     namecell = document.createElement("td");
                     namecell.textContent = article.name;
                     row.appendChild(namecell);
                     codecell = document.createElement("td");
-                    codecell.textContent = article.code;
+                    codecell.textContent = article.article_id;
                     row.appendChild(codecell);
                     pricecell = document.createElement("td");
                     pricecell.textContent = article.price;

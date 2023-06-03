@@ -2,6 +2,7 @@ package DAO;
 
 import beans.Article;
 import beans.Auction;
+import utils.AuctionFullInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -78,9 +79,9 @@ public class AuctionDAO {
 		return filteredAuctions;
 	}
 
-	public LinkedHashMap<Auction, List<Article>> getFiltered(String keyword, LocalDateTime time) throws SQLException{
+	public List<AuctionFullInfo> getFiltered(String keyword, LocalDateTime time) throws SQLException{
 
-		LinkedHashMap<Auction, List<Article>> mapfilteredAuctions = new LinkedHashMap<>();
+		List<AuctionFullInfo> auctionFullList = new ArrayList<>();
 
 		try{
 			pstatement = connection.prepareStatement("SELECT * FROM auction x JOIN article y on x.auction_id= y.auction_id where x.auction_id = (SELECT DISTINCT au.auction_id FROM auction au JOIN article ar ON ar.auction_id = au.auction_id WHERE (ar.name LIKE ? OR ar.description LIKE ?) AND au.expiring_date > ? AND au.open = '1') ORDER BY x.expiring_date ASC, y.article_id ASC");
@@ -88,16 +89,18 @@ public class AuctionDAO {
 			pstatement.setString(2, "%" + keyword.toUpperCase() + "%");
 			pstatement.setObject(3, time);
 			result = pstatement.executeQuery();
+			int prev_auction_id = -1;
 			while (result.next()) {
 				Auction auction = resultToAuction(result);
 				Article article = resultToArticle(result);
-				if(mapfilteredAuctions.containsKey(auction)){
-					mapfilteredAuctions.get(auction).add(article);
+				if(auction.getAuction_id() == prev_auction_id){
+					auctionFullList.get(auctionFullList.size()-1).addArticle(article);
 				}
 				else{
 					List<Article> articles = new ArrayList<>();
 					articles.add(article);
-					mapfilteredAuctions.put(auction, articles);
+					auctionFullList.add(new AuctionFullInfo(auction, articles, null));
+					prev_auction_id = auction.getAuction_id();
 				}
 
 			}
@@ -116,7 +119,7 @@ public class AuctionDAO {
 				throw new SQLException(e2);
 			}
 		}
-		return mapfilteredAuctions;
+		return auctionFullList;
 	}
 
 	public List<Auction> getOpenAuctions(int user_id) throws SQLException{
