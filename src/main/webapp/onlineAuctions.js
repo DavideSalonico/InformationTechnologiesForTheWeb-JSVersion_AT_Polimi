@@ -158,31 +158,38 @@
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
         }
 
-        this.specialShow = function(){
+        this.specialShow = function() {
             let self = this;
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
             let lastVisitedAuctions = localStorage.getItem('visitedAuctions');
             let lVA = new Map();
-            lVA = JSON.parse(lastVisitedAuctions);
-            makeCall("GET", 'LastVisited?lVA=' + lVA.values().toString() ,null,
-                function(req){
-                    if(req.readyState === 4){
-                        let message = req.responseText;
-                        if(req.status === 200){
-                            let stillValidAuctions = JSON.parse(req.responseText);
-                            let currDate = new Date();
-                            self.searchedAuctionContainer.update(stillValidAuctions, currDate);
+            if (lastVisitedAuctions != null) {
+                lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
+
+                // Convert the values of lVA map to an array of integers
+                let lVAValuesArray = Array.from(lVA.keys());
+                // or: let lVAValuesArray = [...lVA.values()];
+
+                makeCall("GET", 'LastVisited?lVA=' + lVAValuesArray.join(','), null,
+                    function(req) {
+                        if (req.readyState === 4) {
+                            let message = req.responseText;
+                            if (req.status === 200) {
+                                let stillValidAuctions = JSON.parse(req.responseText);
+                                let currDate = new Date();
+                                self.searchedAuctionContainer.update(stillValidAuctions, currDate);
+                            } else if (req.status === 403) {
+                                sessionStorage.removeItem('username');
+                                window.location.href = "home.html";
+                            } else {
+                                self.alert.textContent = message;
+                            }
                         }
-                        else if(req.status === 403){
-                            sessionStorage.removeItem('username');
-                            window.location.href = "home.html";
-                        }
-                        else{
-                            self.alert.textContent = message;
-                        }
-                    }
-                });
-        }
+                    });
+            }
+        };
+
+
 
         this.registerEvents = function(){
             this.searchButton.addEventListener('click', (e) => {
@@ -1171,8 +1178,15 @@
             auctionDetailsPage.reset();
 
             localStorage.setItem('lastActionWasCreateAuction', 'false');
-            let map = JSON.parse(localStorage.getItem('visitedAuctions')).put(auctionId, new Date());
-            localStorage.setItem('visitedAuctions', JSON.stringify(map));
+            let map = new Map();
+            const storedAuctions = localStorage.getItem('visitedAuctions');
+            if (storedAuctions) {
+                const parsedAuctions = JSON.parse(storedAuctions);
+                const entries = Object.entries(parsedAuctions);
+                map = new Map(entries);
+            }
+            map.set(auctionId, new Date());
+            localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
         }
 
         this.renderAuctionDetails = function(auctionId){
@@ -1184,8 +1198,15 @@
             auctionDetailsPage.show(auctionId);
 
             localStorage.setItem('lastActionWasCreateAuction', 'false');
-            let map = JSON.parse(localStorage.getItem('visitedAuctions')).put(auctionId, new Date());
-            localStorage.setItem('visitedAuctions', JSON.stringify(map));
+            let map = new Map();
+            const storedAuctions = localStorage.getItem('visitedAuctions');
+            if (storedAuctions) {
+                const parsedAuctions = JSON.parse(storedAuctions);
+                const entries = Object.entries(parsedAuctions);
+                map = new Map(entries);
+            }
+            map.set(auctionId, new Date());
+            localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
         }
 
         this.renderSpecialPurchase = function(){
