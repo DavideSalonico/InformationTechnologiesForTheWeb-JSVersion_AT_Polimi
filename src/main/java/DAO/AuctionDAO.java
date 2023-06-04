@@ -295,7 +295,7 @@ public class AuctionDAO {
 					        GROUP BY o3.auction
 					    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price
 					) o ON o.auction = au.auction_id
-					WHERE auction_id = ?;""");
+					WHERE au.auction_id = ?;""");
 			pstatement.setInt(1, auction_id);
 			result = pstatement.executeQuery();
 			if(result.next()) {

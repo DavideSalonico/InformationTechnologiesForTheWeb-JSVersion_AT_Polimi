@@ -249,8 +249,15 @@
                 anchor.addEventListener("click", function(event){
                     event.preventDefault();
                     pageOrchestrator.renderOffers(aucFullInfo.auction.auction_id);
-                    let map = JSON.parse(localStorage.getItem('visitedAuction')).put(aucFullInfo.auction.auction_id, new Date());
-                    localStorage.setItem('visitedAuction', JSON.stringify(map));
+                    let map = new Map();
+                    const storedAuctions = localStorage.getItem('visitedAuctions');
+                    if (storedAuctions) {
+                        const parsedAuctions = JSON.parse(storedAuctions);
+                        const entries = Object.entries(parsedAuctions);
+                        map = new Map(entries);
+                    }
+                    map.set(auctionId, new Date());
+                    localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
                 });
                 table = document.createElement("table");
                 thead = document.createElement("thead");
