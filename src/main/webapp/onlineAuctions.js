@@ -363,7 +363,7 @@
             if(openAuctions.length > 0){
                 self.openContainer.innerHTML = "";
                 openAuctions.forEach((aucFullInfo) => {
-                    let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
+                    let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par, maxOffer;
                     anchor = document.createElement("a");
                     anchor.addEventListener("click", function(event){
                         event.preventDefault();
@@ -400,14 +400,18 @@
                     });
                     table.appendChild(tbody);
                     par = document.createElement("p");
+                    maxOffer = document.createElement("p");
                     let exp = aucFullInfo.auction.expiring_date;
                     let expDate = new Date(Date.parse(exp));
                     let log = sessionStorage.getItem("logDate");
                     let logDate = new Date(Date.parse(log));
                     let diffTime = timeDifference(expDate, logDate);
+                    let maxO = aucFullInfo.maxOffer.price;
                     par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                    maxOffer.textContent = "Maximum offer: " + maxO;
                     anchor.appendChild(table);
                     anchor.appendChild(par);
+                    anchor.appendChild(maxOffer);
                     self.openContainer.appendChild(anchor);
                 });
             } else{
@@ -419,7 +423,7 @@
             if(closedAuctions.length > 0){
                 self.closedContainer.innerHTML = "";
                 closedAuctions.forEach((aucFullInfo) => {
-                    let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
+                    let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par, maxOffer;
                     anchor = document.createElement("a");
                     anchor.addEventListener("click", function(event){
                         event.preventDefault();
@@ -456,14 +460,18 @@
                     });
                     table.appendChild(tbody);
                     par = document.createElement("p");
+                    maxOffer = document.createElement("p");
                     let exp = aucFullInfo.auction.expiring_date;
                     let expDate = new Date(Date.parse(exp));
                     let log = sessionStorage.getItem("logDate");
                     let logDate = new Date(Date.parse(log));
                     let diffTime = timeDifference(expDate, logDate);
+                    let maxO = aucFullInfo.maxOffer.price;
                     par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                    maxOffer.textContent = "Maximum offer: " + maxO;
                     anchor.appendChild(table);
                     anchor.appendChild(par);
+                    anchor.appendChild(maxOffer);
                     self.closedContainer.appendChild(anchor);
                 });
             } else{

@@ -232,16 +232,16 @@ public class AuctionDAO {
 		List<AuctionFullInfo> auctions = new ArrayList<>();
 		try {
 			pstatement = connection.prepareStatement("""
-					SELECT *
+					SELECT *, o.price AS offer_price
 					FROM auction au
 					JOIN article ar ON au.auction_id = ar.auction_id
 					LEFT JOIN (
 					    SELECT o1.*
 					    FROM offer o1
 					    INNER JOIN (
-					        SELECT auction, MAX(price) AS max_price
-					        FROM offer
-					        GROUP BY auction
+					        SELECT o3.auction, MAX(o3.price) AS max_price
+					        FROM offer o3
+					        GROUP BY o3.auction
 					    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price
 					) o ON o.auction = au.auction_id
 					WHERE creator = ?;""");
@@ -308,7 +308,7 @@ public class AuctionDAO {
 		offer.setOffer_id(result.getInt("offer_id"));
 		offer.setAuction(result.getInt("auction"));
 		offer.setUser(result.getInt("user"));
-		offer.setPrice(result.getInt("price"));
+		offer.setPrice(result.getInt("offer_price"));
 		Timestamp ldt = result.getTimestamp("time");
 		if(ldt != null)
 			offer.setTime(ldt.toLocalDateTime());
