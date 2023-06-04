@@ -44,7 +44,8 @@ public class CloseAuction extends HttpServlet {
 		try {
 			auction_id = Integer.parseInt(request.getParameter("auctionId"));
 		} catch (NumberFormatException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect auctionId value");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Incorrect auctionId value");
 			return;
 		}
 
@@ -52,18 +53,21 @@ public class CloseAuction extends HttpServlet {
 
 		try {
 			if (!auctionDAO.checkUserId(auction_id, user_id)) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not possible to close this auction: you are not the owner");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Not possible to close this auction: you are not the owner");
 				return;
 			}
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to check the user id. Try again later");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Not possible to check the user id. Try again later");
 			return;
 		}
 
 		try {
 			auctionDAO.changeAuctionStatus(auction_id);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to close the auction. Try again later");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Not possible to close the auction. Try again later");
 		}
 
 		response.setStatus(HttpServletResponse.SC_OK);
