@@ -85,7 +85,8 @@ public class MakeOffer extends HttpServlet {
 			aucId = Integer.parseInt(strAucId);
 			offerValue = Integer.parseInt(request.getParameter("offer"));
 		} catch (NumberFormatException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "auctionIn and offer must be integers!");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("auctionIn and offer must be integers!");
 			return;
 		}
 
@@ -93,14 +94,16 @@ public class MakeOffer extends HttpServlet {
 			// This return the Auction object related to the specified auction if it exists or null
 			auction = auctionDAO.getAuction(aucId);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Auction not found or access to database failed!");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Auction not found or access to database failed!");
 			return;
 		}
 
 		if (auction != null) {
 			// Checks if the logged user has created the auction
 			if (auction.getCreator() == (user.getUser_id())) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error. You can't make an offer for your own auction!");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Error. You can't make an offer for your own auction!");
 				return;
 			}
 
@@ -108,14 +111,16 @@ public class MakeOffer extends HttpServlet {
 				// This returns the Offer object related to the maximum offer for specified auction if it exists or null
 				maxAuctionOffer = offerDAO.getWinningOffer(aucId);
 			} catch (SQLException e) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error. Access to database failed! Cannot retrieve the maximum offer!");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getWriter().println("Error. Access to database failed! Cannot retrieve the maximum offer!");
 				return;
 			}
 
 			// This checks, if there is a maximum offer, if it belongs to the logged user
 			// If so, the user is not allowed to make another offer
 			if (maxAuctionOffer != null && user.getUser_id() == (maxAuctionOffer.getUser())) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error. You have to wait for another user to make an offer!");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Error. You have to wait for another user to make an offer!");
 				return;
 			}
 			if (checkValue(offerValue, auction, maxAuctionOffer)) {
@@ -123,15 +128,18 @@ public class MakeOffer extends HttpServlet {
 					// This returns true if the Offer has been added to the database
 					int outcome = offerDAO.insertOffer(offerValue, currLdt, user.getUser_id(), aucId);
 					if (outcome == 0) {
-						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore, accesso al database fallito! Could not insert the offer!");
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						response.getWriter().println("Errore, accesso al database fallito! Could not insert the offer!");
 						return;
 					}
 				} catch (SQLException e) {
-					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error while inserting the offer!");
+					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					response.getWriter().println("Error while inserting the offer!");
 					return;
 				}
 			} else {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error, the offer's value is not valid! " +
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Error, the offer's value is not valid! " +
 						"Your offer must be greater than the minimum raise plus the maximum offer's value!" +
 						" If there are no offers, your offer must be greater than the initial price!" +
 						" Max value allowed: 1 billion!");
@@ -139,7 +147,8 @@ public class MakeOffer extends HttpServlet {
 		}
 		else {
 			// The given ID doesn't belong to any of the auctions
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Specified auction doesn't exist!");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Specified auction doesn't exist!");
 		}
 
 		response.setStatus(HttpServletResponse.SC_OK);
