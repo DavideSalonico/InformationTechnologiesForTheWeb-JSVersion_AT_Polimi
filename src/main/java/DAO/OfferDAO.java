@@ -32,7 +32,7 @@ public class OfferDAO {
 				Offer off = new Offer();
 				off.setOffer_id(result.getInt("offer_id"));
 				off.setPrice(result.getInt("price"));
-				off.setTime(result.getTimestamp("time").toLocalDateTime());
+				off.setTime(result.getObject("time", LocalDateTime.class));
 				//SO THE CLIENT CAN'T SEE THE USER ID
 				off.setUser(result.getInt("user"));
 				off.setAuction(result.getInt("auction"));

@@ -47,6 +47,9 @@ public class MakeOffer extends HttpServlet {
 		// Page is a parameter that allows to distinguish between the dettagli.html and offerta.html pages
 		if(request.getParameter("auctionId") != null ){
 			makeOffer(request, response);
+		}else{
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Invalid auctionID parameters");
 		}
 	}
 
