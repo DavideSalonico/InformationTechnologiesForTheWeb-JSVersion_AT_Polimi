@@ -102,7 +102,6 @@ public class GoToAuctionDetails extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println(json);
-
 	}
 	
 

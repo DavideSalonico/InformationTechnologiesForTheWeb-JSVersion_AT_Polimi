@@ -1,6 +1,6 @@
 {
     //page components
-    let loginBanner, menu, purchasePage, sellPage, offersList, auctionDetailsPage, pageOrchestrator;
+    let loginBanner, menu, purchasePage, sellPage, offerPage, auctionDetailsPage, pageOrchestrator;
     let alertContainer = document.getElementById("id_alert");
 
     pageOrchestrator = new PageOrchestrator();
@@ -478,6 +478,27 @@
                                 if (req.status === 200) {
                                     self.createAuctionWizard.show();
                                 } else if (req.status === 403) {
+                                    window.location.href = req.getResponseHeader("Location");
+                                    window.sessionStorage.removeItem('username');
+                                } else {
+                                    self.alert.textContent = message;
+                                }
+                            }
+                        })
+                } else {
+                    form.reportValidity();
+                }
+
+                /*
+                if (form.checkValidity()) {
+                    let self = this;
+                    makeCall("POST", 'CreateArticle', form,
+                        function (req) {
+                            if (req.readyState === 4) {
+                                let message = req.responseText;
+                                if (req.status === 200) {
+                                    self.createAuctionWizard.show();
+                                } else if (req.status === 403) {
                                     window.location.href = req.getResponseHeader("Location"); //TODO: ???
                                     window.sessionStorage.removeItem('username');
                                 } else {
@@ -488,6 +509,7 @@
                 } else {
                     form.reportValidity();
                 }
+                 */
             });
         }
     }
@@ -708,13 +730,32 @@
         }
     }
 
-    function OfferList(_offersPage, _articleList, _offerList) {
-        this.offersPage = _offersPage;
-        this.articleList = _articleList;
-        this.offerList = _offerList;
-        this.makeOfferButton = document.getElementById("id_makeOfferButton");
+    function OfferPage(_offerPage) {
+        this.offerPage = _offerPage;
+        let articleList, offerList, offerMaker;
 
-        this.show = function (auctionId) {
+        this.start = function () {
+            offerList = new OfferList(document.getElementById("id_offerList"));
+            offerMaker = new OfferMaker(document.getElementById("id_hiddenAucIdMakeOffer"));
+            articleList = new ArticleList(document.getElementById("id_offerArticles"), offerList, offerMaker);
+        }
+
+        this.show = function(int) {
+            let self = this;
+            articleList.show(int);
+            self.offerPage.style.display = "block";
+        }
+
+        this.reset = function () {
+            let self = this;
+            self.offerPage.style.display = "none";
+        }
+    }
+
+    function ArticleList(_articleList, offerList, offerMaker){
+        this.articleList = _articleList;
+
+        this.show = function(auctionId){
             let aucDetails;
             let self = this;
             makeCall("GET", "GoToAuctionDetails?auctionId=" + auctionId, null,
@@ -723,25 +764,9 @@
                         let message = req.responseText;
                         if (req.status === 200) {
                             aucDetails = JSON.parse(req.responseText);
-                            self.makeOfferButton.addEventListener('click', (e) => {
-                                let form = e.target.closest("form");
-                                document.getElementById("id_hiddenAucIdMakeOffer").value = aucDetails.auction.auction_id;
-                                makeCall("POST", "MakeOffer", form,
-                                    cback = function (req) {
-                                        if (req.readyState === 4) {
-                                            let message = req.responseText;
-                                            if (req.status === 200) {
-                                                pageOrchestrator.renderOffers(aucDetails.auction.auction_id);
-                                            } else if (req.status === 403) {
-                                                window.location.href = req.getResponseHeader("Location");
-                                                window.sessionStorage.removeItem('username');
-                                            } else {
-                                                self.alert.textContent = message;
-                                            }
-                                        }
-                                    });
-                            }, false);
-                            offersList.update(aucDetails);
+                            offerMaker.registerEvents(aucDetails.auction.auction_id);
+                            self.update(aucDetails);
+                            offerList.update(aucDetails);
                         } else if (req.status === 403) {
                             window.location.href = req.getResponseHeader("Location");
                             window.sessionStorage.removeItem('username');
@@ -750,14 +775,17 @@
                         }
                     }
                 });
-            this.offersPage.style.display = "block";
         }
 
-
-        this.update = function (aucDetails){
-            //Create articles table
+        this.update = function(aucDetails){
             createArticleTable(aucDetails.articles, this.articleList, "List of Articles contained by auction", "No articles contained by auction");
+        }
+    }
 
+    function OfferList(_offerList){
+        this.offerList = _offerList;
+
+        this.update = function(aucDetails){
             //Create offers table
             if(aucDetails.offers_username != null && aucDetails.offers_username.length > 0){
                 this.offerList.innerHTML = "";
@@ -796,31 +824,6 @@
                 });
                 table.appendChild(tbody);
                 this.offerList.appendChild(table);
-                if(sessionStorage.getItem("username") === aucDetails.winner)
-                    {
-                    let button = document.createElement("button");
-                    button.textContent = "Close Auction";
-                    button.addEventListener('click', () => {
-                        let self = this;
-                        makeCall("GET", "CloseAuction?auctionId=" + aucDetails.auction.auction_id, null,
-                            function (req) {
-                                if (req.readyState === 4) {
-                                    let message = req.responseText;
-                                    if (req.status === 200) {
-                                        pageOrchestrator.renderSell();
-                                    }
-                                    else if (req.status === 403) {
-                                        window.location.href = req.getResponseHeader("Location");
-                                        window.sessionStorage.removeItem('username');
-                                    }
-                                    else {
-                                        self.alert.textContent = message;
-                                    }
-                                }
-                            });
-                    });
-                    this.offerList.appendChild(button);}
-
             }
             else {
                 this.offerList.innerHTML = "";
@@ -829,31 +832,136 @@
                 this.offerList.appendChild(title);
             }
         }
+    }
 
-        this.reset = function () {
-            let self = this;
-            self.offersPage.style.display = "none";
+    function OfferMaker(_makeOfferButton){
+        this.makeOfferButton = _makeOfferButton;
+
+        this.registerEvents = function(auctionId){
+            this.makeOfferButton.addEventListener('click', (e) => {
+                let form = e.target.closest("form");
+                this.makeOfferButton.value = auctionId;
+                makeCall("POST", "MakeOffer", form,
+                    function (req) {
+                        if (req.readyState === 4) {
+                            let message = req.responseText;
+                            if (req.status === 200) {
+                                pageOrchestrator.renderOffers(auctionId);
+                            } else if (req.status === 403) {
+                                window.location.href = req.getResponseHeader("Location");
+                                window.sessionStorage.removeItem('username');
+                            } else {
+                                self.alert.textContent = message;
+                            }
+                        }
+                    });
+            }, false);
+        }
+    }
+
+    function AuctionCloser(_auctionCloser, _auctionInfo){
+        this.auctionCloser = _auctionCloser;
+        this.closeAuctionButton = document.getElementById("id_closeAuctionButton");
+        this.auctionInfo = _auctionInfo;
+
+        this.show = function(auctionId, open, winner){
+            if(open == true){
+                this.closeAuctionButton.addEventListener('click', (e) => {
+                    let self = this;
+                    makeCall("GET", "CloseAuction?auctionId=" + auctionId, null,
+                        function (req) {
+                            if (req.readyState === 4) {
+                                let message = req.responseText;
+                                if (req.status === 200) {
+                                    pageOrchestrator.renderSell();
+                                }
+                                else if (req.status === 403) {
+                                    window.location.href = req.getResponseHeader("Location");
+                                    window.sessionStorage.removeItem('username');
+                                }
+                                else {
+                                    self.alert.textContent = message;
+                                }
+                            }
+                        });
+                    this.auctionCloser.style.display = "block";
+                    }
+                )
+            }
+            else{
+                this.auctionCloser.style.display = "none";
+                this.auctionInfo.update(winner);
+                //TODO: remove event listener
+            }
+
+            /*
+            if(sessionStorage.getItem("username") === aucDetails.winner){
+                let button = document.createElement("button");
+                button.textContent = "Close Auction";
+                button.addEventListener('click', () => {
+                    let self = this;
+                    makeCall("GET", "CloseAuction?auctionId=" + aucDetails.auction.auction_id, null,
+                        function (req) {
+                            if (req.readyState === 4) {
+                                let message = req.responseText;
+                                if (req.status === 200) {
+                                    pageOrchestrator.renderSell();
+                                }
+                                else if (req.status === 403) {
+                                    window.location.href = req.getResponseHeader("Location");
+                                    window.sessionStorage.removeItem('username');
+                                }
+                                else {
+                                    self.alert.textContent = message;
+                                }
+                            }
+                        });
+                });
+                this.offerList.appendChild(button);}
+             */
+
+        }
+    }
+
+    function AuctionInfo(_auctionInfo){
+        this.auctionInfo = _auctionInfo;
+
+        this.reset = function(){
+            this.auctionInfo.style.display = "none";
         }
 
-
+        this.update = function(winner){
+            let self = this;
+            if(winner != null){
+                self.auctionInfo.style.display = "block";
+                self.auctionInfo.textContent = "Auction closed. Winner is " + winner.username + "\nAddress: " + winner.address;
+            }
+            else{
+                self.auctionInfo.style.display = "none";
+            }
+        }
     }
 
     function AuctionDetailsPage(_auctionDetailsPage) {
         this.auctionDetailsPage = _auctionDetailsPage;
+        let artList, offList, aucCloser, aucInfo;
 
         this.start = function () {
-            //auctionDetails = new AuctionDetails(document.getElementById("id_auctionDetails"));
-            //auctionDetails.show();
+            offList = new OfferList(document.getElementById("id_offerList"));
+            artList = new ArticleList(document.getElementById("id_detailsArtList"), offList);
+            aucCloser = new AuctionCloser(document.getElementById("id_auctionCloser"));
+            aucInfo = new AuctionInfo(document.getElementById("id_auctionInfo"));
         };
+
+        this.show = function(int) {
+            let self = this;
+            artList.show(int);
+            self.offerPage.style.display = "block";
+        }
 
         this.reset = function () {
             let self = this;
             self.auctionDetailsPage.style.display = "none";
-        }
-
-        this.show = function () {
-            let self = this;
-            self.auctionDetailsPage.style.display = "block";
         }
     }
 
@@ -878,8 +986,8 @@
             sellPage = new SellPage(document.getElementById("id_sellPage"));
             sellPage.start();
 
-            offersList = new OfferList(document.getElementById("id_offersPage"), document.getElementById("id_offerArticles") ,document.getElementById("id_offerList"));
-            offersList.reset();
+            offerPage = new OfferPage(document.getElementById("id_offersPage"));
+            offerPage.start();
 
             auctionDetailsPage = new AuctionDetailsPage(document.getElementById("id_auctionDetailsPage"));
             auctionDetailsPage.start();
@@ -890,7 +998,7 @@
             loginBanner.show();
             purchasePage.reset();
             sellPage.reset();
-            offersList.reset();
+            offerPage.reset();
             auctionDetailsPage.reset();
         };
 
@@ -898,7 +1006,7 @@
             loginBanner.reset();
             purchasePage.show();
             sellPage.reset();
-            offersList.reset()
+            offerPage.reset()
             auctionDetailsPage.reset();
         };
 
@@ -906,7 +1014,7 @@
             loginBanner.reset();
             purchasePage.reset();
             sellPage.show();
-            offersList.reset();
+            offerPage.reset();
             auctionDetailsPage.reset();
         };
 
@@ -914,7 +1022,7 @@
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
-            offersList.show(auctionId);
+            offerPage.show(auctionId);
             auctionDetailsPage.reset();
         }
 
@@ -922,7 +1030,7 @@
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
-            offersList.reset();
+            offerPage.reset();
             auctionDetailsPage.show(auctionId);
         }
     }
