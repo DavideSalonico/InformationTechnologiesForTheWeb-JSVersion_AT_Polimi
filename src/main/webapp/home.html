@@ -212,38 +212,18 @@
                 <!-- INFO ABOUT AUCTION (articles etc) -->
                 <div class="row first-row details">
                     <h2>Informations</h2>
-                    <p>Selected auction does not exists</p>
-                    <p >Auction for selected article is expired</p>
                     <section >
-                        <div>
-                            <h2>List of Articles contained by auction</h2>
-                            <block th:if="${not article.isEmpty()}">
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Code</th>
-                                        <th>Image</th>
-                                        <th>Description</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!--TABLE BODY-->
-                                    </tbody>
-                                </table>
-                            </block>
-                            <p>Nessun articolo disponibile</p>
-                            <!--INFO about auction(price, raise, expiring)-->
+                        <div id="id_offerArticles">
                         </div>
                     </section>
                 </div>
 
                 <!-- LIST OF OFFERS -->
                 <div class="row second-row offers-list">
-                    <section class="mid-col scrollable" >
+                    <section class="mid-col scrollable"  id="id_offerList">
                         <h2 >OFFERS</h2>
                         <p >Non esiste alcuna offerta al momento!</p>
-                        <table >
+                        <table>
                             <thead>
                             <tr>
                                 <th class="tbl-val tbl-name">Nome</th>
@@ -263,16 +243,14 @@
                 </div>
 
                 <!-- FORM FOR OFFER -->
-                <div id="offerForm"class="row third-row form" >
+                <div id="offerForm" class="row third-row form" >
                     <h2>New Offer</h2>
                     <form action="" method="">
-                        <div>
-                            <label for="offer">Value:</label>
-                            <input type="number" name="offer" id="offer" min="1" max="2000000000" step="1" min="${min}" required>
-                            <span>&euro;</span>
-                            <input type="hidden" name="auctionId">
-                        </div>
-                        <button name="offer-submit" type="submit">Confirm</button>
+                        <fieldset>
+                            Value: <input type="number" name="offer" min="1" max="2000000000" step="1" required><span>&euro;</span>
+                            <input type="hidden" name="auctionId" id="id_hiddenAucIdMakeOffer">
+                            <input type="button" name="offer-submit" value="Confirm" id="id_makeOfferButton">
+                        </fieldset>
                     </form>
                 </div>
             </div>

@@ -136,14 +136,13 @@ public class MakeOffer extends HttpServlet {
 						" If there are no offers, your offer must be greater than the initial price!" +
 						" Max value allowed: 1 billion!");
 			}
-
-			String path = getServletContext().getContextPath() +"/GoToAuctionDetails?auctionId=" + strAucId + "&page=offer.html";
-			response.sendRedirect(path);
-
-		} else {
+		}
+		else {
 			// The given ID doesn't belong to any of the auctions
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Specified auction doesn't exist!");
 		}
+
+		response.setStatus(HttpServletResponse.SC_OK);
 	}
 
 }

@@ -18,8 +18,6 @@ public class AuctionDetailsInfo {
     public AuctionDetailsInfo(Auction auction, List<Article> articles, List <Pair<Offer,String>> offers_username, User winner) {
         this.auction = auction;
         this.articles = new ArrayList<>(articles);
-        this.offers_username = new ArrayList<>(offers_username);
-        this.winner = winner;
     }
 
     public void addWinner(User winner) {

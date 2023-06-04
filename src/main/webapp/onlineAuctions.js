@@ -1,6 +1,6 @@
 {
     //page components
-    let loginBanner, menu, purchasePage, sellPage, offersPage, auctionDetailsPage;
+    let loginBanner, menu, purchasePage, sellPage, offersList, auctionDetailsPage, pageOrchestrator;
     let alertContainer = document.getElementById("id_alert");
 
     pageOrchestrator = new PageOrchestrator();
@@ -36,6 +36,52 @@
         return new DiffDate(days, hours, minutes);
     }
 
+    function createArticleTable(artList, container, title, emptyMessage) {
+        if(artList.length === 0){
+            container.innerHTML = "";
+            let msg = document.createElement("p");
+            msg.textContent = emptyMessage;
+            container.appendChild(msg);
+        }
+        else{
+            container.innerHTML = "";
+            let ttl = document.createElement("h2");
+            ttl.textContent = title
+            container.appendChild(ttl);
+            let table = document.createElement("table");
+            let thead = document.createElement("thead");
+            let hrow = document.createElement("tr");
+            let namehead = document.createElement("td");
+            namehead.textContent = "Name";
+            hrow.appendChild(namehead);
+            let codehead = document.createElement("td");
+            codehead.textContent = "Code";
+            hrow.appendChild(codehead);
+            let pricehead = document.createElement("td");
+            pricehead.textContent = "Price";
+            hrow.appendChild(pricehead);
+            thead.appendChild(hrow);
+            table.appendChild(thead);
+            let tbody = document.createElement("tbody");
+            artList.forEach((article) => {
+                let row = document.createElement("tr");
+                let namecell = document.createElement("td");
+                namecell.textContent = article.name;
+                row.appendChild(namecell);
+                let codecell = document.createElement("td");
+                codecell.textContent = article.article_id;
+                row.appendChild(codecell);
+                let pricecell = document.createElement("td");
+                pricecell.textContent = article.price;
+                row.appendChild(pricecell);
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+    }
+
+
     // Constructors of view components
     function LoginBanner(_username, _bannercontainer, _messagecontainer){
         this.username = _username;
@@ -58,17 +104,17 @@
         this.sell = _sell;
         this.logout = _logout;
 
-        this.registerEvents = function(orchestrator){
+        this.registerEvents = function(){
             this.home.addEventListener('click', () => {
-                orchestrator.refresh();
+                pageOrchestrator.refresh();
             }, false);
 
             this.purchase.addEventListener('click', () => {
-                orchestrator.renderPurchase();
+                pageOrchestrator.renderPurchase();
             }, false);
 
             this.sell.addEventListener('click', () => {
-                orchestrator.renderSell();
+                pageOrchestrator.renderSell();
             }, false);
 
             this.logout.addEventListener('click', () => {
@@ -145,7 +191,7 @@
                 anchor = document.createElement("a");
                 anchor.addEventListener("click", function(event){
                     event.preventDefault();
-                    self.orchestrator.renderOffers(aucFullInfo.auction);
+                    pageOrchestrator.renderOffers(aucFullInfo.auction.auction_id);
                 });
                 table = document.createElement("table");
                 thead = document.createElement("thead");
@@ -294,7 +340,7 @@
             let openAuctions = [];
             let closedAuctions = [];
             auctionList.forEach((aucFullInfo) => {
-                if(aucFullInfo.auction.open == 1){
+                if(aucFullInfo.auction.open === "1"){
                     openAuctions.push(aucFullInfo);
                 }
                 else{
@@ -308,7 +354,7 @@
                     anchor = document.createElement("a");
                     anchor.addEventListener("click", function(event){
                         event.preventDefault();
-                        self.orchestrator.renderAuctionDetails(aucFullInfo.auction);
+                        pageOrchestrator.renderAuctionDetails(aucFullInfo.auction);
                     });
                     table = document.createElement("table");
                     thead = document.createElement("thead");
@@ -364,7 +410,7 @@
                     anchor = document.createElement("a");
                     anchor.addEventListener("click", function(event){
                         event.preventDefault();
-                        self.orchestrator.renderAuctionDetails(aucFullInfo.auction);
+                        pageOrchestrator.renderAuctionDetails(aucFullInfo.auction);
                     });
                     table = document.createElement("table");
                     thead = document.createElement("thead");
@@ -421,7 +467,6 @@
         this.createAuctionWizard = createAuctionWizard;
 
         this.registerEvents = function() {
-            let self = this;
             this.formButton.addEventListener('click', (e) => {
                 let form = e.target.closest("form");
                 if (form.checkValidity()) {
@@ -447,6 +492,7 @@
         }
     }
 
+/*
     function Article(article_id, name, description, image, price, auction_id){
         this.article_id = article_id;
         this.name = name;
@@ -455,6 +501,8 @@
         this.price = price;
         this.auction_id = auction_id;
     }
+
+ */
 
     function CreateAuctionWizard(_addArticleToAuctionButton, _createAuctionButton){
         this.addArticleToAuctionButton = _addArticleToAuctionButton;
@@ -550,13 +598,12 @@
 
         this.registerEvents = function(){
             let self = this;
-            self.addArticleToAuctionButton.addEventListener('click', (e) => {
-                let form = e.target.closest("form");
+            self.addArticleToAuctionButton.addEventListener('click', () => {
+                //let form = e.target.closest("form");
                 let articleSelector = document.getElementById("id_articleSelector");
                 let articleToAdd_id = articleSelector.value;
-                let articleToAdd = self.availableArticles.filter((el) => { return el.article_id == articleToAdd_id; })[0];
-                console.log(articleToAdd);
-                self.availableArticles = self.availableArticles.filter((el) => { return el.article_id != articleToAdd_id; });
+                let articleToAdd = self.availableArticles.filter((el) => { return el.article_id === articleToAdd_id; })[0];
+                self.availableArticles = self.availableArticles.filter((el) => { return el.article_id !== articleToAdd_id; });
                 for (let i = 0; i < articleSelector.options.length; i++) {
                     if (articleSelector.options[i].value === articleToAdd_id) {
                         articleSelector.options[i].remove(i);
@@ -610,37 +657,8 @@
         }
     }
 
-    function OfferList(_offerList) {
-        this.offerList = _offerList;
-
-        this.show = function () {
-            makeCall("GET", "GetOffers", null,
-                cback = function (req) {
-                    if (req.readyState === 4) {
-                        let message = req.responseText;
-                        if (req.status === 200) {
-                            let offers = JSON.parse(req.responseText);
-                            //TODO
-                        } else if (req.status === 403) {
-                            window.location.href = req.getResponseHeader("Location");
-                            window.sessionStorage.removeItem('username');
-                        } else {
-                            self.alert.textContent = message;
-                        }
-                    }
-                });
-        }
-    }
-
-    function OfferInfo(){
-        this.show = function(){
-            //TODO
-        }
-    }
-
-    function PurchasePage(orchestrator, _purchasePage) {
+    function PurchasePage(_purchasePage) {
         let searchForm, wonOffers;
-        this.orchestrator = orchestrator;
         this.purchasePage = _purchasePage;
 
         this.start = function () {
@@ -663,14 +681,13 @@
         }
     }
 
-    function SellPage(orchestrator, _sellPage) {
-        let openAuctions, closedAuctions, createArticleWizard, createAuctionWizard;
-        this.orchestrator = orchestrator;
+    function SellPage(_sellPage) {
+        let auctionList, createArticleWizard, createAuctionWizard;
         this.sellPage = _sellPage;
 
         this.start = function () {
-            openAuctions = new AuctionLists(document.getElementById("id_openAuctions"), document.getElementById("id_closedAuctions"));
-            openAuctions.show();
+            auctionList = new AuctionLists(document.getElementById("id_openAuctions"), document.getElementById("id_closedAuctions"));
+            auctionList.show();
 
             createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_addToAuctionButton"), document.getElementById("id_createAuctionButton"));
             createAuctionWizard.show();
@@ -691,34 +708,137 @@
         }
     }
 
-    function OffersPage(orchestrator, _offersPage) {
-        let offersList;
-        let offerInfo;
-        this.orchestrator = orchestrator;
+    function OfferList(_offersPage, _articleList, _offerList) {
         this.offersPage = _offersPage;
+        this.articleList = _articleList;
+        this.offerList = _offerList;
+        this.makeOfferButton = document.getElementById("id_makeOfferButton");
 
+        this.show = function (auctionId) {
+            let aucDetails;
+            let self = this;
+            makeCall("GET", "GoToAuctionDetails?auctionId=" + auctionId, null,
+                cback = function (req) {
+                    if (req.readyState === 4) {
+                        let message = req.responseText;
+                        if (req.status === 200) {
+                            aucDetails = JSON.parse(req.responseText);
+                            self.makeOfferButton.addEventListener('click', (e) => {
+                                let form = e.target.closest("form");
+                                document.getElementById("id_hiddenAucIdMakeOffer").value = aucDetails.auction.auction_id;
+                                makeCall("POST", "MakeOffer", form,
+                                    cback = function (req) {
+                                        if (req.readyState === 4) {
+                                            let message = req.responseText;
+                                            if (req.status === 200) {
+                                                pageOrchestrator.renderOffers(aucDetails.auction.auction_id);
+                                            } else if (req.status === 403) {
+                                                window.location.href = req.getResponseHeader("Location");
+                                                window.sessionStorage.removeItem('username');
+                                            } else {
+                                                self.alert.textContent = message;
+                                            }
+                                        }
+                                    });
+                            }, false);
+                            offersList.update(aucDetails);
+                        } else if (req.status === 403) {
+                            window.location.href = req.getResponseHeader("Location");
+                            window.sessionStorage.removeItem('username');
+                        } else {
+                            self.alert.textContent = message;
+                        }
+                    }
+                });
+            this.offersPage.style.display = "block";
+        }
+
+
+        this.update = function (aucDetails){
+            //Create articles table
+            createArticleTable(aucDetails.articles, this.articleList, "List of Articles contained by auction", "No articles contained by auction");
+
+            //Create offers table
+            if(aucDetails.offers_username != null && aucDetails.offers_username.length > 0){
+                this.offerList.innerHTML = "";
+                let title = document.createElement("h2");
+                title.textContent = "List of Offers for this auction";
+                this.offerList.appendChild(title);
+                let table = document.createElement("table");
+                let thead = document.createElement("thead");
+                let hrow = document.createElement("tr");
+                let idcell = document.createElement("th");
+                idcell.textContent = "OfferID";
+                hrow.appendChild(idcell);
+                let usercell = document.createElement("th");
+                usercell.textContent = "Username";
+                hrow.appendChild(usercell);
+                let pricecell = document.createElement("th");
+                pricecell.textContent = "Price";
+                hrow.appendChild(pricecell);
+                this.offerList.appendChild(hrow);
+                thead.appendChild(hrow);
+                table.appendChild(thead);
+                let tbody = document.createElement("tbody");
+                aucDetails.offers_username.forEach((offer) => {
+                    let row, icell, ucell, pcell;
+                    row = document.createElement("tr");
+                    icell = document.createElement("td");
+                    icell.textContent = offer.first.offer_id;
+                    row.appendChild(icell);
+                    ucell = document.createElement("td");
+                    ucell.textContent = offer.second;
+                    row.appendChild(ucell);
+                    pcell = document.createElement("td");
+                    pcell.textContent = offer.first.price;
+                    row.appendChild(pcell);
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                this.offerList.appendChild(table);
+                if(sessionStorage.getItem("username") === aucDetails.winner)
+                    {
+                    let button = document.createElement("button");
+                    button.textContent = "Close Auction";
+                    button.addEventListener('click', () => {
+                        let self = this;
+                        makeCall("GET", "CloseAuction?auctionId=" + aucDetails.auction.auction_id, null,
+                            function (req) {
+                                if (req.readyState === 4) {
+                                    let message = req.responseText;
+                                    if (req.status === 200) {
+                                        pageOrchestrator.renderSell();
+                                    }
+                                    else if (req.status === 403) {
+                                        window.location.href = req.getResponseHeader("Location");
+                                        window.sessionStorage.removeItem('username');
+                                    }
+                                    else {
+                                        self.alert.textContent = message;
+                                    }
+                                }
+                            });
+                    });
+                    this.offerList.appendChild(button);}
+
+            }
+            else {
+                this.offerList.innerHTML = "";
+                let title = document.createElement("h2");
+                title.textContent = "No offers for this auction";
+                this.offerList.appendChild(title);
+            }
+        }
 
         this.reset = function () {
             let self = this;
             self.offersPage.style.display = "none";
         }
 
-        this.start = function () {
-            let self = this;
 
-            offersList = new OfferList(document.getElementById("id_offersList"));
-            offersList.show();
-
-            offerInfo = new OfferInfo(document.getElementById("id_offerInfo"));
-            offerInfo.show();
-
-            self.offersPage.style.display = "block";
-        }
     }
 
-    function AuctionDetailsPage(orchestrator, _auctionDetailsPage) {
-        let auctionDetails;
-        this.orchestrator = orchestrator;
+    function AuctionDetailsPage(_auctionDetailsPage) {
         this.auctionDetailsPage = _auctionDetailsPage;
 
         this.start = function () {
@@ -752,16 +872,16 @@
                 document.getElementById("id_username"));
             loginBanner.show();
 
-            purchasePage = new PurchasePage(this, document.getElementById("id_purchasePage"));
+            purchasePage = new PurchasePage(document.getElementById("id_purchasePage"));
             purchasePage.start();
 
-            sellPage = new SellPage(this, document.getElementById("id_sellPage"));
+            sellPage = new SellPage(document.getElementById("id_sellPage"));
             sellPage.start();
 
-            offersPage = new OffersPage(this, document.getElementById("id_offersPage"));
-            offersPage.start();
+            offersList = new OfferList(document.getElementById("id_offersPage"), document.getElementById("id_offerArticles") ,document.getElementById("id_offerList"));
+            offersList.reset();
 
-            auctionDetailsPage = new AuctionDetailsPage(this, document.getElementById("id_auctionDetailsPage"));
+            auctionDetailsPage = new AuctionDetailsPage(document.getElementById("id_auctionDetailsPage"));
             auctionDetailsPage.start();
         };
 
@@ -770,7 +890,7 @@
             loginBanner.show();
             purchasePage.reset();
             sellPage.reset();
-            offersPage.reset();
+            offersList.reset();
             auctionDetailsPage.reset();
         };
 
@@ -778,7 +898,7 @@
             loginBanner.reset();
             purchasePage.show();
             sellPage.reset();
-            offersPage.reset()
+            offersList.reset()
             auctionDetailsPage.reset();
         };
 
@@ -786,24 +906,24 @@
             loginBanner.reset();
             purchasePage.reset();
             sellPage.show();
-            offersPage.reset();
+            offersList.reset();
             auctionDetailsPage.reset();
         };
 
-        this.renderOffers = function(auc){
+        this.renderOffers = function(auctionId){
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
-            offersPage.show(auc);
+            offersList.show(auctionId);
             auctionDetailsPage.reset();
         }
 
-        this.renderAuctionDetails = function(auc){
+        this.renderAuctionDetails = function(auctionId){
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
-            offersPage.reset();
-            auctionDetailsPage.show(auc);
+            offersList.reset();
+            auctionDetailsPage.show(auctionId);
         }
     }
 }

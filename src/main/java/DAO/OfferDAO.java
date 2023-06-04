@@ -34,7 +34,7 @@ public class OfferDAO {
 				off.setPrice(result.getInt("price"));
 				off.setTime(result.getTimestamp("time").toLocalDateTime());
 				//SO THE CLIENT CAN'T SEE THE USER ID
-				off.setUser(0);
+				off.setUser(result.getInt("user"));
 				off.setAuction(result.getInt("auction"));
 				String username = result.getString("username");
 				offers.add(new Pair<>(off,username));
