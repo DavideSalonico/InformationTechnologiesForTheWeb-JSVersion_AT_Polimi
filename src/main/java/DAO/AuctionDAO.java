@@ -278,7 +278,57 @@ public class AuctionDAO {
 		}
 		return auctions;
 	}
-	
+
+	public AuctionFullInfo getAuctionFullInfo(int auction_id) throws SQLException{
+		AuctionFullInfo auctionFullInfo = null;
+		try {
+			pstatement = connection.prepareStatement("""
+					SELECT *, o.price AS offer_price
+					FROM auction au
+					JOIN article ar ON au.auction_id = ar.auction_id
+					LEFT JOIN (
+					    SELECT o1.*
+					    FROM offer o1
+					    INNER JOIN (
+					        SELECT o3.auction, MAX(o3.price) AS max_price
+					        FROM offer o3
+					        GROUP BY o3.auction
+					    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price
+					) o ON o.auction = au.auction_id
+					WHERE auction_id = ?;""");
+			pstatement.setInt(1, auction_id);
+			result = pstatement.executeQuery();
+			if(result.next()) {
+				Auction auction = resultToAuction(result);
+				List<Article> articles = new ArrayList<>();
+				articles.add(resultToArticle(result));
+				Offer offer = resultToOffer(result);
+				while(result.next()) {
+					articles.add(resultToArticle(result));
+				}
+				auctionFullInfo = new AuctionFullInfo(auction, articles, offer);
+			}
+
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+
+		} finally {
+			try {
+				result.close();
+			} catch (Exception e1) {
+				throw new SQLException(e1);
+			}
+			try {
+				pstatement.close();
+			} catch (Exception e2) {
+				throw new SQLException(e2);
+			}
+		}
+		return auctionFullInfo;
+	}
+
 	private Auction resultToAuction(ResultSet result) throws SQLException{
 		Auction auction = new Auction();
 		auction.setAuction_id(result.getInt("auction_id"));
