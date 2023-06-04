@@ -475,7 +475,7 @@
     function CreateArticleWizard(_formButton, createAuctionWizard){
         this.formButton = _formButton;
         this.createAuctionWizard = createAuctionWizard;
-        this.alert = document.getElementById("alert");
+        this.alert = document.getElementById("id_alert");
 
         this.registerEvents = function() {
             this.formButton.addEventListener('click', (e) => {
@@ -508,7 +508,7 @@
         this.createAuctionButton = _createAuctionButton;
         this.availableArticles = [];
         this.selectedArticles = [];
-        this.alert = document.getElementById("alert");
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(){
             let self = this;
@@ -597,7 +597,7 @@
         }
 
         this.registerEvents = function(){
-            this.alert = document.getElementById("alert");
+            this.alert = document.getElementById("id_alert");
             let self = this;
 
             self.addArticleToAuctionButton.addEventListener('click', () => {
@@ -735,7 +735,7 @@
 
     function ArticleList(_articleList, offerList, offerMaker){
         this.articleList = _articleList;
-        this.alert = document.getElementById("id_articleListAlert");
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(auctionId){
             let aucDetails;
@@ -819,7 +819,7 @@
     function OfferMaker(_makeOfferButton, _hiddenAucIdMakeOffer){
         this.makeOfferButton = _makeOfferButton;
         this.hiddenAucIdMakeOffer = _hiddenAucIdMakeOffer;
-        this.alert = document.getElementById("id_makeOfferAlert");
+        this.alert = document.getElementById("id_alert");
 
         this.registerEvents = function(auctionId){
             this.makeOfferButton.addEventListener('click', (e) => {
@@ -847,7 +847,7 @@
     function DetArticleList(_articleList, offerList, aucCloser){
         this.articleList = _articleList;
         this.offerList = offerList;
-        this.alert = document.getElementById("id_articleListAlert");
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(auctionId){
             let aucDetails;
@@ -943,7 +943,7 @@
     function AuctionCloser(_auctionCloser, auctionInfo){
         this.auctionCloser = _auctionCloser;
         this.auctionInfo = auctionInfo;
-        this.alert = document.getElementById("id_closeAuctionAlert");
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(auctionId, open, winner, expired){
             if(open == true && expired == true) {
