@@ -83,6 +83,7 @@ public class GoToAuctionDetails extends HttpServlet {
 				if(awardedUser != null){
 					// Removes the password from the object for security purposes
 					awardedUser.setPassword("");
+					awardedUser.setUser_id(0);
 				}
 				auctionDetailsInfo.addOfferWinner(auctionOffers,awardedUser);
 			}

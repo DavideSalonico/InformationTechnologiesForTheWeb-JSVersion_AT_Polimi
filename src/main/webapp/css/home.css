@@ -24,8 +24,6 @@ lft-col {
 }
 
 .introduction p {
-	/* Justify the description and doesn't cut words */
-	text-align: justify;
   	text-justify: inter-word;
    	font-size: 18px;
 }
