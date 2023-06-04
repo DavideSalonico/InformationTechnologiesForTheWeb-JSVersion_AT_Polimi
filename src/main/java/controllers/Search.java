@@ -61,7 +61,7 @@ public class Search extends HttpServlet {
 		if (key != null){
 			if(!validateKey(key)){
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().println("Not valid key!, key must contain only letters and be longer than 2 characters, but less than 63");
+				response.getWriter().println("Not valid key! key must contain only letters and be longer than 2 characters, but less than 63");
 				return;
 			}
 			try {

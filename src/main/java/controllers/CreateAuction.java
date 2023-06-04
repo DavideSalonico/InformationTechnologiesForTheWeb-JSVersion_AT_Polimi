@@ -67,19 +67,22 @@ public class CreateAuction extends HttpServlet {
 		try {
 			expiring_date =  LocalDateTime.parse(request.getParameter("expiring_date")).truncatedTo(ChronoUnit.MINUTES);
 			if (checkDatetime(expiring_date)) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect datetime");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Incorrect datetime");
 				return;
 			}
 			minimum_raise = Integer.parseInt(request.getParameter("minimum_raise"));
 			if (minimum_raise < 1 || minimum_raise > 1000000) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Minimum raise must be between 1 and 1000000");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Minimum raise must be between 1 and 1000000");
 				return;
 			}
 			creator = (((User) request.getSession().getAttribute("user")).getUser_id());
 
 			String[] tmpString = request.getParameterValues("articlesSelected" );
 			if( tmpString == null ) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No articles selected to add to the auction");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("No articles selected to add to the auction");
 				return;
 			}
 			for (String s : tmpString) {
@@ -87,7 +90,8 @@ public class CreateAuction extends HttpServlet {
 			}
 
 		} catch (NumberFormatException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect input");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Incorrect input");
 			return;
 		}
 
@@ -100,7 +104,8 @@ public class CreateAuction extends HttpServlet {
 			initial_price = articleDAO.getAuctionInitialPrice(auction_id);
 			auctionDAO.setInitialPrice(auction_id, initial_price);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create auction. Error in database");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Not possible to create auction. Error in database");
 			return;
 		}
 

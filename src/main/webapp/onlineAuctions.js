@@ -892,7 +892,9 @@
             minimumRaise.textContent = "Minimum raise: " + aucDetails.auction.minimum_raise;
             this.articleList.appendChild(minimumRaise);
             let expiringDate = document.createElement("p");
-            expiringDate.textContent = "Expiring date: " + aucDetails.auction.expiring_date;
+            let expDate = new Date(Date.parse(aucDetails.auction.expiring_date));
+            let truncatedDate = (expDate.toString()).split('GMT')[0];
+            expiringDate.textContent = "Expiring date: " + truncatedDate;
             this.articleList.appendChild(expiringDate);
         }
     }

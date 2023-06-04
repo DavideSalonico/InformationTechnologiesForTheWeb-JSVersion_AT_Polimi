@@ -35,8 +35,6 @@ table * {
 
 th, td {
     border: 1px solid #666666;
-    /* The text remains inline, there is no wrapping on a new line */
-    white-space: nowrap;
     /* Avoids to show an horizontal scrollbar if the text doesn't fit the td container */
     overflow: hidden;
     /* If the text doesn't fit, shows a few dots, indicating that the string is not finished */
