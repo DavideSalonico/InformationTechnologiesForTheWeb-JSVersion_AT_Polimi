@@ -155,6 +155,7 @@
                     }
                     makeCall("GET", 'Search?key=' + key,null,
                         function(req){
+                            self.alert.textContent = "";
                         if(req.readyState === 4){
                             let message = req.responseText;
                             if(req.status === 200){
@@ -253,6 +254,7 @@
 
             makeCall("GET", "WonOffers", null,
                 function(req){
+                    self.alert.textContent = "";
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
@@ -329,6 +331,7 @@
             let self = this;
             makeCall("GET", "GetAuctionsList", null,
                 function(req){
+                self.alert.textContent = "";
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
@@ -484,6 +487,7 @@
                     let self = this;
                     makeCall("POST", 'CreateArticle', form,
                         function (req) {
+                            self.alert.textContent = "";
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
@@ -522,6 +526,7 @@
             listDiv.appendChild(par);
             makeCall("GET", 'GetAvailableArticles', null,
                 cback = function (req) {
+                    self.alert.textContent = "";
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
@@ -636,6 +641,7 @@
                     let self = this;
                     makeCall("POST", 'CreateAuction', form,
                         function (req) {
+                            self.alert.textContent = "";
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
@@ -742,6 +748,7 @@
             let self = this;
             makeCall("GET", "GoToAuctionDetails?auctionId=" + auctionId, null,
                 cback = function (req) {
+                    self.alert.textContent = "";
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
@@ -828,6 +835,7 @@
                 let self = this;
                 makeCall("POST", "MakeOffer", form,
                     function (req) {
+                        self.alert.textContent = "";
                         if (req.readyState === 4) {
                             let message = req.responseText;
                             if (req.status === 200) {
@@ -854,6 +862,7 @@
             let self = this;
             makeCall("GET", "GoToAuctionDetails?auctionId=" + auctionId, null,
                 function (req) {
+                    self.alert.textContent = "";
                     if (req.readyState === 4) {
                         let message = req.responseText;
                         if (req.status === 200) {
@@ -952,6 +961,7 @@
                     let self = this;
                     makeCall("GET", "CloseAuction?auctionId=" + auctionId, null,
                         function (req) {
+                            self.alert.textContent = "";
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
