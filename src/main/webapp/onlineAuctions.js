@@ -10,7 +10,22 @@
             window.location.href = "index.html";
         } else {
             pageOrchestrator.start();
-            pageOrchestrator.refresh();
+            let hasLoggedBefore = localStorage.getItem('hasLoggedBefore');
+            if(hasLoggedBefore){
+                if(localStorage.getItem('lastActionWasCreateAuction') === "true"){
+                    pageOrchestrator.renderSell();
+                }
+                else{
+                    pageOrchestrator.renderSpecialPurchase();
+                }
+            }
+            else{
+                localStorage.setItem('hasLoggedBefore', "true");
+                let visitedAuctions = new Map();
+                localStorage.setItem('visitedAuctions', JSON.stringify(visitedAuctions));
+                localStorage.setItem('lastActionWasCreateAuction', "false");
+                pageOrchestrator.renderPurchase();
+            }
         }
     }, false);
 
@@ -143,6 +158,32 @@
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
         }
 
+        this.specialShow = function(){
+            let self = this;
+            self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
+            let lastVisitedAuctions = localStorage.getItem('visitedAuctions');
+            let lVA = new Map();
+            lVA = JSON.parse(lastVisitedAuctions);
+            makeCall("GET", 'LastVisited?lVA=' + lVA.values().toString() ,null,
+                function(req){
+                    if(req.readyState === 4){
+                        let message = req.responseText;
+                        if(req.status === 200){
+                            let stillValidAuctions = JSON.parse(req.responseText);
+                            let currDate = new Date();
+                            self.searchedAuctionContainer.update(stillValidAuctions, currDate);
+                        }
+                        else if(req.status === 403){
+                            sessionStorage.removeItem('username');
+                            window.location.href = "home.html";
+                        }
+                        else{
+                            self.alert.textContent = message;
+                        }
+                    }
+                });
+        }
+
         this.registerEvents = function(){
             this.searchButton.addEventListener('click', (e) => {
                 let form = e.target.closest("form");
@@ -165,7 +206,7 @@
                                 //self.reset(); // to delete the inserted key in the form
                             }
                             else if(req.status === 403){
-                                window.location.href = req.getResponseHeader("Location"); //TODO: ???
+                                window.location.href = req.getResponseHeader("Location");
                                 window.sessionStorage.removeItem('username');
                             }
                             else{
@@ -201,6 +242,8 @@
                 anchor.addEventListener("click", function(event){
                     event.preventDefault();
                     pageOrchestrator.renderOffers(aucFullInfo.auction.auction_id);
+                    let map = JSON.parse(localStorage.getItem('visitedAuction')).put(aucFullInfo.auction.auction_id, new Date());
+                    localStorage.setItem('visitedAuction', JSON.stringify(map));
                 });
                 table = document.createElement("table");
                 thead = document.createElement("thead");
@@ -236,7 +279,12 @@
                 let exp = aucFullInfo.auction.expiring_date;
                 let expDate = new Date(Date.parse(exp));
                 let diffTime = timeDifference(expDate, currDate);
-                par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                if(diffTime.minutes > 0){
+                    par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                }
+                else{
+                    par.textContent = "Expired";
+                }
                 anchor.appendChild(table);
                 anchor.appendChild(par);
                 self.searchedAuctionsDiv.appendChild(anchor);
@@ -406,6 +454,12 @@
                     let log = sessionStorage.getItem("logDate");
                     let logDate = new Date(Date.parse(log));
                     let diffTime = timeDifference(expDate, logDate);
+                    if(diffTime.minutes > 0){
+                        par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                    }
+                    else{
+                        par.textContent = "Expired";
+                    }
                     let maxO = aucFullInfo.maxOffer.price;
                     par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
                     maxOffer.textContent = "Maximum offer: " + maxO;
@@ -469,6 +523,12 @@
                     let maxO = aucFullInfo.maxOffer.price;
                     par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
                     maxOffer.textContent = "Maximum offer: " + maxO;
+                    if(diffTime.minutes > 0){
+                        par.textContent = "Remaining time: " + diffTime.days + " days, " + diffTime.hours + " hours, " + diffTime.minutes + " minutes";
+                    }
+                    else{
+                        par.textContent = "Expired";
+                    }
                     anchor.appendChild(table);
                     anchor.appendChild(par);
                     anchor.appendChild(maxOffer);
@@ -499,6 +559,7 @@
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
+                                    localStorage.setItem("lastActionWasCreateAuction", "false");
                                     self.createAuctionWizard.show();
                                 } else if (req.status === 403) {
                                     window.location.href = req.getResponseHeader("Location");
@@ -653,6 +714,7 @@
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
+                                    localStorage.setItem("lastActionWasCreateAuction", "true");
                                     self.availableArticles = [];
                                     self.selectedArticles = [];
                                     self.show();
@@ -694,6 +756,12 @@
 
         this.show = function () {
             let self = this;
+            self.purchasePage.style.display = "block";
+        }
+
+        this.specialShow = function () {
+            let self = this;
+            searchForm.specialShow();
             self.purchasePage.style.display = "block";
         }
     }
@@ -1069,38 +1137,66 @@
             sellPage.reset();
             offerPage.reset();
             auctionDetailsPage.reset();
+
+            localStorage.setItem('lastActionWasCreateAuction', 'false');
         };
 
         this.renderPurchase = function(){
+            alertContainer.textContent = "";
             loginBanner.reset();
             purchasePage.show();
             sellPage.reset();
             offerPage.reset()
             auctionDetailsPage.reset();
+
+            localStorage.setItem('lastActionWasCreateAuction', 'false');
         };
 
         this.renderSell = function(){
+            alertContainer.textContent = "";
             loginBanner.reset();
             purchasePage.reset();
             sellPage.show();
             offerPage.reset();
             auctionDetailsPage.reset();
+
         };
 
         this.renderOffers = function(auctionId){
+            alertContainer.textContent = "";
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
             offerPage.show(auctionId);
             auctionDetailsPage.reset();
+
+            localStorage.setItem('lastActionWasCreateAuction', 'false');
+            let map = JSON.parse(localStorage.getItem('visitedAuctions')).put(auctionId, new Date());
+            localStorage.setItem('visitedAuctions', JSON.stringify(map));
         }
 
         this.renderAuctionDetails = function(auctionId){
+            alertContainer.textContent = "";
             loginBanner.reset();
             purchasePage.reset();
             sellPage.reset();
             offerPage.reset();
             auctionDetailsPage.show(auctionId);
+
+            localStorage.setItem('lastActionWasCreateAuction', 'false');
+            let map = JSON.parse(localStorage.getItem('visitedAuctions')).put(auctionId, new Date());
+            localStorage.setItem('visitedAuctions', JSON.stringify(map));
+        }
+
+        this.renderSpecialPurchase = function(){
+            alertContainer.textContent = "";
+            loginBanner.reset();
+            sellPage.reset();
+            offerPage.reset();
+            auctionDetailsPage.reset();
+
+            purchasePage.specialShow();
+            localStorage.setItem('lastActionWasCreateAuction', 'false');
         }
     }
 }
