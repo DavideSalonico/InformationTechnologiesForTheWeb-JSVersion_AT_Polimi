@@ -8,6 +8,7 @@ import beans.User;
 import utils.ConnectionHandler;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @WebServlet("/MakeOffer")
+@MultipartConfig
 public class MakeOffer extends HttpServlet {
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -45,9 +47,11 @@ public class MakeOffer extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// Page is a parameter that allows to distinguish between the dettagli.html and offerta.html pages
-		if(request.getParameter("auctionId") != null ){
+		try{
+			String strAucId = request.getParameter("auctionId");
+			Integer aucId = Integer.parseInt(strAucId);
 			makeOffer(request, response);
-		}else{
+		}catch (NumberFormatException e){
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Invalid auctionID parameters");
 		}
