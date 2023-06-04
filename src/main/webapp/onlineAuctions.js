@@ -83,10 +83,11 @@
 
 
     // Constructors of view components
-    function LoginBanner(_username, _bannercontainer, _messagecontainer){
+    function LoginBanner(_username, _bannercontainer, _messagecontainer, _alertContainer){
         this.username = _username;
         this.bannercontainer = _bannercontainer;
         this.messagecontainer = _messagecontainer;
+        this.alertContainer = alertContainer;
 
         this.reset = function(){
             this.bannercontainer.style.display = "none";
@@ -95,6 +96,12 @@
         this.show = function(){
             this.messagecontainer.textContent = "Welcome back " + _username;
             this.bannercontainer.style.display = "block";
+            if(_username == null){
+                this.bannercontainer.style.display = "none";
+                this.messagecontainer.textContent = "";
+                this.alertContainer.textContent =  "LOGIN FAILED !";
+                this.alert.style.display = "block";
+            }
         };
     }
 
@@ -129,6 +136,7 @@
     function SearchForm(_searchButton, _searchedAuctionsContainerDiv){
         this.searchButton = _searchButton;
         this.searchedAuctionsContainerDiv = _searchedAuctionsContainerDiv;
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(){
             let self = this;
@@ -141,10 +149,10 @@
                 if(form.checkValidity()){
                     let self = this;
                     let key = form.querySelector("input").value;
-                    //if(key === ""){
-                    //    self.alert.textContent = "Insert a keyword";
-                    //    return;
-                    //}
+                    if(key === ""){
+                       self.alert.textContent = "Insert a keyword";
+                        return;
+                    }
                     makeCall("GET", 'Search?key=' + key,null,
                         function(req){
                         if(req.readyState === 4){
@@ -238,6 +246,7 @@
 
     function WonOfferContainer(_wonOfferContainer){
         this.wonOfferContainer = _wonOfferContainer;
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(){
             let self = this;
@@ -314,6 +323,7 @@
     function AuctionLists(_openContainer, _closedContainer){
         this.openContainer = _openContainer;
         this.closedContainer = _closedContainer;
+        this.alert = document.getElementById("id_alert");
 
         this.show = function(){
             let self = this;
@@ -465,6 +475,7 @@
     function CreateArticleWizard(_formButton, createAuctionWizard){
         this.formButton = _formButton;
         this.createAuctionWizard = createAuctionWizard;
+        this.alert = document.getElementById("alert");
 
         this.registerEvents = function() {
             this.formButton.addEventListener('click', (e) => {
@@ -497,6 +508,7 @@
         this.createAuctionButton = _createAuctionButton;
         this.availableArticles = [];
         this.selectedArticles = [];
+        this.alert = document.getElementById("alert");
 
         this.show = function(){
             let self = this;
@@ -585,7 +597,9 @@
         }
 
         this.registerEvents = function(){
+            this.alert = document.getElementById("alert");
             let self = this;
+
             self.addArticleToAuctionButton.addEventListener('click', () => {
                 //let form = e.target.closest("form");
                 let articleSelector = document.getElementById("id_articleSelector");
@@ -720,6 +734,7 @@
 
     function ArticleList(_articleList, offerList, offerMaker){
         this.articleList = _articleList;
+        this.alert = document.getElementById("id_articleListAlert");
 
         this.show = function(auctionId){
             let aucDetails;
@@ -803,11 +818,13 @@
     function OfferMaker(_makeOfferButton, _hiddenAucIdMakeOffer){
         this.makeOfferButton = _makeOfferButton;
         this.hiddenAucIdMakeOffer = _hiddenAucIdMakeOffer;
+        this.alert = document.getElementById("id_makeOfferAlert");
 
         this.registerEvents = function(auctionId){
             this.makeOfferButton.addEventListener('click', (e) => {
                 let form = e.target.closest("form");
                 this.hiddenAucIdMakeOffer.value = auctionId;
+                let self = this;
                 makeCall("POST", "MakeOffer", form,
                     function (req) {
                         if (req.readyState === 4) {
@@ -829,6 +846,7 @@
     function DetArticleList(_articleList, offerList, aucCloser){
         this.articleList = _articleList;
         this.offerList = offerList;
+        this.alert = document.getElementById("id_articleListAlert");
 
         this.show = function(auctionId){
             let aucDetails;
@@ -915,6 +933,7 @@
     function AuctionCloser(_auctionCloser, auctionInfo){
         this.auctionCloser = _auctionCloser;
         this.auctionInfo = auctionInfo;
+        this.alert = document.getElementById("id_closeAuctionAlert");
 
         this.show = function(auctionId, open, winner, expired){
             if(open == true && expired == true) {
@@ -996,7 +1015,8 @@
 
             loginBanner = new LoginBanner(sessionStorage.getItem("username"),
                 document.getElementById("id_loginBanner"),
-                document.getElementById("id_username"));
+                document.getElementById("id_username"),
+                alertContainer);
             loginBanner.show();
 
             purchasePage = new PurchasePage(document.getElementById("id_purchasePage"));
