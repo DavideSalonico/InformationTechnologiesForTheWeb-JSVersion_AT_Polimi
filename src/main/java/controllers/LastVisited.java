@@ -1,7 +1,6 @@
 package controllers;
 
 import DAO.AuctionDAO;
-import beans.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import utils.AuctionFullInfo;
@@ -44,21 +43,29 @@ public class LastVisited extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        User user = (User) request.getSession().getAttribute("user");
         List<AuctionFullInfo> finalAuctionsInfo = new ArrayList<>();
         List<Integer> auctions = new ArrayList<>();
 
-        String [] stringheAppoggio = request.getParameterValues("lVA");
+        String paramValue = request.getParameter("lVA");
 
-        if( stringheAppoggio == null ) {
+        if (paramValue != null) {
+            String[] values = paramValue.split(",");
+
+            for (String value : values) {
+                try {
+                    int intValue = Integer.parseInt(value.trim());
+                    auctions.add(intValue);
+                } catch (NumberFormatException e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().println("Incorrect format for the parameter");
+                }
+            }
+        } else{
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("No auctions visited selected to add to the auction");
             return;
         }
 
-        for (String s : stringheAppoggio) {
-            auctions.add(Integer.parseInt(s));
-        }
 
         try {
             for(Integer id : auctions){
