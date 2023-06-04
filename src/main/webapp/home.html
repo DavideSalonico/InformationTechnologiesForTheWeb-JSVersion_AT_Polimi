@@ -138,70 +138,28 @@
         <div id="id_auctionDetailsPage" >
             <div class="row first-row details">
                 <h2>INFORMATIONS</h2>
-                <p>User did not create the auction or user does not exists</p>
                 <!-- LIST OF ARTICLES -->
                 <section>
                     <div>
-                        <h2 id="dtl-articles">List of Articles contained by auction</h2>
-                        <block>
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Code</th>
-                                    <th>Image</th>
-                                    <th>Description</th>
-                                </tr>
-                                </thead>
-                                <tbody id="id_articleDetailsTBody">
-                                </tbody>
-                            </table>
+                        <block id="id_detailsArtList">
                         </block>
                         <!--INFO about auction-->
                         <p id="id_detailsPrezzoIniziale"><strong>Prezzo iniziale: </strong> &euro;</p>
                         <p id="id_detailsMinimumRaise"><strong>Rialzo minimo: </strong> &euro;</p>
                         <p id="id_detailsExpiringTime"><strong>Scadenza: </strong></p>
                     </div>
-
-                    <div if="${!auction.isOpen() and awardedUser == null}">
-                        <hr>
-                        <h2 id="dtl-info">INFORMATIONS:</h2>
-                        <p>No offers made for this article</p>
-                        <!-- Add a button to close the auction -->
-                    </div>
-
-                    <div>
-                        <hr>
-                        <h2 id="dtl-infoAwarded">Winner informations</h2>
-                        <p><strong>Name: </strong><span></span></p>
-                        <p><strong>Offer: </strong><span></span> &euro;</p>
-                        <p><strong>Address: </strong><span ></span></p>
-                    </div>
                 </section>
             </div>
 
             <!-- LIST OF OFFERS -->
             <div class="row second-row offers-list">
-                <section class="mid-col scrollable">
-                    <h2 id="dtl-offers">OFFERS</h2>
-                    <p>Non esiste alcuna offerta al momento!</p>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th class="tbl-val tbl-name">Nome</th>
-                            <th class="tbl-val tbl-offer">Offerta (&euro;)</th>
-                            <th class="tbl-val tbl-date">Data</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <!-- LIST OF OFFERS-->
-                        </tbody>
-                    </table>
-                    <a class="button-link">
-                        <button>Close auction</button>
-                    </a>
-
+                <h2 id="dtl-offers">OFFERS</h2>
+                <section class="mid-col scrollable" id="id_detailsOfferList">
                 </section>
+                <a class="button-link" id="id_auctionCloser">
+                    <button>Close auction</button>
+                </a>
+                <div id="id_auctionInfo"></div>
             </div>
         </div>
 
@@ -236,9 +194,6 @@
                             </tr>
                             </tbody>
                         </table>
-                        <a class="button-link">
-                            <button>Close auction</button>
-                        </a>
                     </section>
                 </div>
 

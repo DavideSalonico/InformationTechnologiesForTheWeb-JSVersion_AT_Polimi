@@ -29,7 +29,7 @@ td {
 	display: inline-block;
 	padding: 10px 20px;
 	text-decoration: none;
-	background-color: #4CAF50;
+	background-color: #b52e19;
 	color: white;
 	border-radius: 4px;
 	border: none;
@@ -37,7 +37,7 @@ td {
 }
 
 .button-link:hover {
-	background-color: #45a049;
+	background-color: #b52e19;
 }
 
 .button-link:focus {

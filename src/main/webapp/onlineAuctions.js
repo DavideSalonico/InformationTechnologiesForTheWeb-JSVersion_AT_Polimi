@@ -340,7 +340,7 @@
             let openAuctions = [];
             let closedAuctions = [];
             auctionList.forEach((aucFullInfo) => {
-                if(aucFullInfo.auction.open === "1"){
+                if(aucFullInfo.auction.open == 1){
                     openAuctions.push(aucFullInfo);
                 }
                 else{
@@ -354,7 +354,7 @@
                     anchor = document.createElement("a");
                     anchor.addEventListener("click", function(event){
                         event.preventDefault();
-                        pageOrchestrator.renderAuctionDetails(aucFullInfo.auction);
+                        pageOrchestrator.renderAuctionDetails(aucFullInfo.auction.auction_id);
                     });
                     table = document.createElement("table");
                     thead = document.createElement("thead");
@@ -488,43 +488,9 @@
                 } else {
                     form.reportValidity();
                 }
-
-                /*
-                if (form.checkValidity()) {
-                    let self = this;
-                    makeCall("POST", 'CreateArticle', form,
-                        function (req) {
-                            if (req.readyState === 4) {
-                                let message = req.responseText;
-                                if (req.status === 200) {
-                                    self.createAuctionWizard.show();
-                                } else if (req.status === 403) {
-                                    window.location.href = req.getResponseHeader("Location"); //TODO: ???
-                                    window.sessionStorage.removeItem('username');
-                                } else {
-                                    self.alert.textContent = message;
-                                }
-                            }
-                        })
-                } else {
-                    form.reportValidity();
-                }
-                 */
             });
         }
     }
-
-/*
-    function Article(article_id, name, description, image, price, auction_id){
-        this.article_id = article_id;
-        this.name = name;
-        this.description = description;
-        this.image = image;
-        this.price = price;
-        this.auction_id = auction_id;
-    }
-
- */
 
     function CreateAuctionWizard(_addArticleToAuctionButton, _createAuctionButton){
         this.addArticleToAuctionButton = _addArticleToAuctionButton;
@@ -736,7 +702,7 @@
 
         this.start = function () {
             offerList = new OfferList(document.getElementById("id_offerList"));
-            offerMaker = new OfferMaker(document.getElementById("id_hiddenAucIdMakeOffer"));
+            offerMaker = new OfferMaker(document.getElementById("id_makeOfferButton"), document.getElementById("id_hiddenAucIdMakeOffer"));
             articleList = new ArticleList(document.getElementById("id_offerArticles"), offerList, offerMaker);
         }
 
@@ -834,13 +800,14 @@
         }
     }
 
-    function OfferMaker(_makeOfferButton){
+    function OfferMaker(_makeOfferButton, _hiddenAucIdMakeOffer){
         this.makeOfferButton = _makeOfferButton;
+        this.hiddenAucIdMakeOffer = _hiddenAucIdMakeOffer;
 
         this.registerEvents = function(auctionId){
             this.makeOfferButton.addEventListener('click', (e) => {
                 let form = e.target.closest("form");
-                this.makeOfferButton.value = auctionId;
+                this.hiddenAucIdMakeOffer.value = auctionId;
                 makeCall("POST", "MakeOffer", form,
                     function (req) {
                         if (req.readyState === 4) {
@@ -859,76 +826,128 @@
         }
     }
 
-    function AuctionCloser(_auctionCloser, _auctionInfo){
-        this.auctionCloser = _auctionCloser;
-        this.closeAuctionButton = document.getElementById("id_closeAuctionButton");
-        this.auctionInfo = _auctionInfo;
+    function DetArticleList(_articleList, offerList, aucCloser){
+        this.articleList = _articleList;
+        this.offerList = offerList;
 
-        this.show = function(auctionId, open, winner){
-            if(open == true){
-                this.closeAuctionButton.addEventListener('click', (e) => {
-                    let self = this;
-                    makeCall("GET", "CloseAuction?auctionId=" + auctionId, null,
-                        function (req) {
-                            if (req.readyState === 4) {
-                                let message = req.responseText;
-                                if (req.status === 200) {
-                                    pageOrchestrator.renderSell();
-                                }
-                                else if (req.status === 403) {
-                                    window.location.href = req.getResponseHeader("Location");
-                                    window.sessionStorage.removeItem('username');
-                                }
-                                else {
-                                    self.alert.textContent = message;
-                                }
-                            }
-                        });
-                    this.auctionCloser.style.display = "block";
+        this.show = function(auctionId){
+            let aucDetails;
+            let self = this;
+            makeCall("GET", "GoToAuctionDetails?auctionId=" + auctionId, null,
+                function (req) {
+                    if (req.readyState === 4) {
+                        let message = req.responseText;
+                        if (req.status === 200) {
+                            aucDetails = JSON.parse(req.responseText);
+                            self.update(aucDetails);
+                            self.offerList.update(aucDetails);
+                            let currTime = new Date();
+                            let expiringTime = new Date(Date.parse(aucDetails.auction.expiring_date));
+                            let expired = expiringTime - currTime <= 0;
+                            aucCloser.show(auctionId, aucDetails.auction.open, aucDetails.auction.winner, expired);
+                        } else if (req.status === 403) {
+                            window.location.href = req.getResponseHeader("Location");
+                            window.sessionStorage.removeItem('username');
+                        } else {
+                            self.alert.textContent = message;
+                        }
                     }
-                )
-            }
-            else{
-                this.auctionCloser.style.display = "none";
-                this.auctionInfo.update(winner);
-                //TODO: remove event listener
-            }
-
-            /*
-            if(sessionStorage.getItem("username") === aucDetails.winner){
-                let button = document.createElement("button");
-                button.textContent = "Close Auction";
-                button.addEventListener('click', () => {
-                    let self = this;
-                    makeCall("GET", "CloseAuction?auctionId=" + aucDetails.auction.auction_id, null,
-                        function (req) {
-                            if (req.readyState === 4) {
-                                let message = req.responseText;
-                                if (req.status === 200) {
-                                    pageOrchestrator.renderSell();
-                                }
-                                else if (req.status === 403) {
-                                    window.location.href = req.getResponseHeader("Location");
-                                    window.sessionStorage.removeItem('username');
-                                }
-                                else {
-                                    self.alert.textContent = message;
-                                }
-                            }
-                        });
                 });
-                this.offerList.appendChild(button);}
-             */
+        }
 
+        this.update = function(aucDetails){
+            createArticleTable(aucDetails.articles, this.articleList, "List of Articles contained by auction", "No articles contained by auction");
+        }
+    }
+
+    function DetOfferList(_offerList){
+        this.offerList = _offerList;
+
+        this.update = function(aucDetails){
+            //Create offers table
+            if(aucDetails.offers_username != null && aucDetails.offers_username.length > 0){
+                this.offerList.innerHTML = "";
+                let title = document.createElement("h2");
+                title.textContent = "List of Offers for this auction";
+                this.offerList.appendChild(title);
+                let table = document.createElement("table");
+                let thead = document.createElement("thead");
+                let hrow = document.createElement("tr");
+                let idcell = document.createElement("th");
+                idcell.textContent = "OfferID";
+                hrow.appendChild(idcell);
+                let usercell = document.createElement("th");
+                usercell.textContent = "Username";
+                hrow.appendChild(usercell);
+                let pricecell = document.createElement("th");
+                pricecell.textContent = "Price";
+                hrow.appendChild(pricecell);
+                this.offerList.appendChild(hrow);
+                thead.appendChild(hrow);
+                table.appendChild(thead);
+                let tbody = document.createElement("tbody");
+                aucDetails.offers_username.forEach((offer) => {
+                    let row, icell, ucell, pcell;
+                    row = document.createElement("tr");
+                    icell = document.createElement("td");
+                    icell.textContent = offer.first.offer_id;
+                    row.appendChild(icell);
+                    ucell = document.createElement("td");
+                    ucell.textContent = offer.second;
+                    row.appendChild(ucell);
+                    pcell = document.createElement("td");
+                    pcell.textContent = offer.first.price;
+                    row.appendChild(pcell);
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                this.offerList.appendChild(table);
+            }
+            else {
+                this.offerList.innerHTML = "";
+                let title = document.createElement("h2");
+                title.textContent = "No offers for this auction";
+                this.offerList.appendChild(title);
+            }
+        }
+    }
+
+    function AuctionCloser(_auctionCloser, auctionInfo){
+        this.auctionCloser = _auctionCloser;
+        this.auctionInfo = auctionInfo;
+
+        this.show = function(auctionId, open, winner, expired){
+            if(open == true && expired == true) {
+                if (sessionStorage.getItem("username") === winner.username) {
+                    let button = document.createElement("button");
+                    button.textContent = "Close Auction";
+                    button.addEventListener('click', () => {
+                        let self = this;
+                        makeCall("GET", "CloseAuction?auctionId=" + auctionId, null,
+                            function (req) {
+                                if (req.readyState === 4) {
+                                    let message = req.responseText;
+                                    if (req.status === 200) {
+                                        pageOrchestrator.renderSell();
+                                    } else if (req.status === 403) {
+                                        window.location.href = req.getResponseHeader("Location");
+                                        window.sessionStorage.removeItem('username');
+                                    } else {
+                                        self.alert.textContent = message;
+                                    }
+                                }
+                            });
+                    });
+                } else {
+                    this.auctionCloser.style.display = "none";
+                    this.auctionInfo.update(winner);
+                }
+            }
         }
     }
 
     function AuctionInfo(_auctionInfo){
         this.auctionInfo = _auctionInfo;
-
-        this.reset = function(){
-            this.auctionInfo.style.display = "none";
-        }
 
         this.update = function(winner){
             let self = this;
@@ -947,16 +966,16 @@
         let artList, offList, aucCloser, aucInfo;
 
         this.start = function () {
-            offList = new OfferList(document.getElementById("id_offerList"));
-            artList = new ArticleList(document.getElementById("id_detailsArtList"), offList);
-            aucCloser = new AuctionCloser(document.getElementById("id_auctionCloser"));
+            offList = new DetOfferList(document.getElementById("id_detailsOfferList"));
             aucInfo = new AuctionInfo(document.getElementById("id_auctionInfo"));
+            aucCloser = new AuctionCloser(document.getElementById("id_auctionCloser"), aucInfo);
+            artList = new DetArticleList(document.getElementById("id_detailsArtList"), artList, aucCloser);
         };
 
         this.show = function(int) {
             let self = this;
             artList.show(int);
-            self.offerPage.style.display = "block";
+            self.auctionDetailsPage.style.display = "block";
         }
 
         this.reset = function () {
