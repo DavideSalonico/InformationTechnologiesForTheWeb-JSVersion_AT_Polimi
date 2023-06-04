@@ -420,7 +420,7 @@
                     anchor = document.createElement("a");
                     anchor.addEventListener("click", function(event){
                         event.preventDefault();
-                        pageOrchestrator.renderAuctionDetails(aucFullInfo.auction);
+                        pageOrchestrator.renderAuctionDetails(aucFullInfo.auction.auction_id);
                     });
                     table = document.createElement("table");
                     thead = document.createElement("thead");
@@ -621,6 +621,7 @@
                 input.textContent = articleToAdd.name;
                 formfieldAuc.appendChild(input);
                  */
+                sellPage.start();
                 this.update();
             });
 
@@ -862,7 +863,7 @@
                             let currTime = new Date();
                             let expiringTime = new Date(Date.parse(aucDetails.auction.expiring_date));
                             let expired = expiringTime - currTime <= 0;
-                            aucCloser.show(auctionId, aucDetails.auction.open, aucDetails.auction.winner, expired);
+                            aucCloser.show(auctionId, aucDetails.auction.open, aucDetails.winner, expired);
                         } else if (req.status === 403) {
                             window.location.href = req.getResponseHeader("Location");
                             window.sessionStorage.removeItem('username');
@@ -875,6 +876,15 @@
 
         this.update = function(aucDetails){
             createArticleTable(aucDetails.articles, this.articleList, "List of Articles contained by auction", "No articles contained by auction");
+            let initialPrice = document.createElement("p");
+            initialPrice.textContent = "Initial price: " + aucDetails.auction.initial_price;
+            this.articleList.appendChild(initialPrice);
+            let minimumRaise = document.createElement("p");
+            minimumRaise.textContent = "Minimum raise: " + aucDetails.auction.minimum_raise;
+            this.articleList.appendChild(minimumRaise);
+            let expiringDate = document.createElement("p");
+            expiringDate.textContent = "Expiring date: " + aucDetails.auction.expiring_date;
+            this.articleList.appendChild(expiringDate);
         }
     }
 
@@ -937,30 +947,30 @@
 
         this.show = function(auctionId, open, winner, expired){
             if(open == true && expired == true) {
-                if (sessionStorage.getItem("username") === winner.username) {
-                    let button = document.createElement("button");
-                    button.textContent = "Close Auction";
-                    button.addEventListener('click', () => {
-                        let self = this;
-                        makeCall("GET", "CloseAuction?auctionId=" + auctionId, null,
-                            function (req) {
-                                if (req.readyState === 4) {
-                                    let message = req.responseText;
-                                    if (req.status === 200) {
-                                        pageOrchestrator.renderSell();
-                                    } else if (req.status === 403) {
-                                        window.location.href = req.getResponseHeader("Location");
-                                        window.sessionStorage.removeItem('username');
-                                    } else {
-                                        self.alert.textContent = message;
-                                    }
+                let button = document.getElementById("id_auctionCloserButton");
+                button.addEventListener('click', () => {
+                    let self = this;
+                    makeCall("GET", "CloseAuction?auctionId=" + auctionId, null,
+                        function (req) {
+                            if (req.readyState === 4) {
+                                let message = req.responseText;
+                                if (req.status === 200) {
+                                    sellPage.start();
+                                    pageOrchestrator.renderSell();
+                                } else if (req.status === 403) {
+                                    window.location.href = req.getResponseHeader("Location");
+                                    window.sessionStorage.removeItem('username');
+                                } else {
+                                    self.alert.textContent = message;
                                 }
-                            });
-                    });
-                } else {
-                    this.auctionCloser.style.display = "none";
-                    this.auctionInfo.update(winner);
-                }
+                            }
+                        });
+                });
+                this.auctionCloser.style.display = "block";
+            }
+            else {
+                this.auctionCloser.style.display = "none";
+                this.auctionInfo.update(winner);
             }
         }
     }
@@ -988,7 +998,7 @@
             offList = new DetOfferList(document.getElementById("id_detailsOfferList"));
             aucInfo = new AuctionInfo(document.getElementById("id_auctionInfo"));
             aucCloser = new AuctionCloser(document.getElementById("id_auctionCloser"), aucInfo);
-            artList = new DetArticleList(document.getElementById("id_detailsArtList"), artList, aucCloser);
+            artList = new DetArticleList(document.getElementById("id_detailsArtList"), offList, aucCloser);
         };
 
         this.show = function(int) {

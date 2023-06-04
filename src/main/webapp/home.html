@@ -143,10 +143,6 @@
                     <div>
                         <block id="id_detailsArtList">
                         </block>
-                        <!--INFO about auction-->
-                        <p id="id_detailsPrezzoIniziale"><strong>Prezzo iniziale: </strong> &euro;</p>
-                        <p id="id_detailsMinimumRaise"><strong>Rialzo minimo: </strong> &euro;</p>
-                        <p id="id_detailsExpiringTime"><strong>Scadenza: </strong></p>
                     </div>
                 </section>
             </div>
@@ -156,9 +152,11 @@
                 <h2 id="dtl-offers">OFFERS</h2>
                 <section class="mid-col scrollable" id="id_detailsOfferList">
                 </section>
-                <a class="button-link" id="id_auctionCloser">
-                    <button>Close auction</button>
-                </a>
+                <form id="id_auctionCloser">
+                    <fieldset>
+                        <input type="button" value="Close Auction" id="id_auctionCloserButton">
+                    </fieldset>
+                </form>
                 <div id="id_auctionInfo"></div>
             </div>
         </div>
@@ -180,7 +178,7 @@
                 <div class="row second-row offers-list">
                     <section class="mid-col scrollable"  id="id_offerList">
                         <h2 >OFFERS</h2>
-                        <p >Non esiste alcuna offerta al momento!</p>
+                        <p>No offers at the moment</p>
                         <table>
                             <thead>
                             <tr>
