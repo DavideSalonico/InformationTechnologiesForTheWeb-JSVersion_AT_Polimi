@@ -515,7 +515,7 @@
             let listDiv = document.getElementById("id_selectedArticlesList");
             listDiv.innerHTML = "";
             let title = document.createElement("h3");
-            title.textContent = "Selected Articles";
+            title.textContent = "Selected Articles : ";
             listDiv.appendChild(title);
             let par = document.createElement("p");
             par.textContent = "No articles selected yet!";

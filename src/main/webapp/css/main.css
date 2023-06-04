@@ -6,6 +6,11 @@ html, body {
 	min-height: 100%;
 }
 
+p {
+    text-align:center;
+    vertical-align: middle;
+}
+
 
 .row {
   height: auto;
