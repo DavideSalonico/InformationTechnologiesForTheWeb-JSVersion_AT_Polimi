@@ -54,7 +54,7 @@ public class AuctionDAO {
 		List<AuctionFullInfo> auctionFullList = new ArrayList<>();
 
 		try{
-			pstatement = connection.prepareStatement("SELECT * FROM auction x JOIN article y on x.auction_id= y.auction_id where x.auction_id = (SELECT DISTINCT au.auction_id FROM auction au JOIN article ar ON ar.auction_id = au.auction_id WHERE (ar.name LIKE ? OR ar.description LIKE ?) AND au.expiring_date > ? AND au.open = '1') ORDER BY x.expiring_date ASC, y.article_id ASC");
+			pstatement = connection.prepareStatement("SELECT * FROM auction x JOIN article y on x.auction_id= y.auction_id where x.auction_id IN (SELECT DISTINCT au.auction_id FROM auction au JOIN article ar ON ar.auction_id = au.auction_id WHERE (ar.name LIKE ? OR ar.description LIKE ?) AND au.expiring_date > ? AND au.open = '1') ORDER BY x.expiring_date ASC, y.article_id ASC");
 			pstatement.setString(1, "%" + keyword.toUpperCase() + "%");
 			pstatement.setString(2, "%" + keyword.toUpperCase() + "%");
 			pstatement.setObject(3, time);
