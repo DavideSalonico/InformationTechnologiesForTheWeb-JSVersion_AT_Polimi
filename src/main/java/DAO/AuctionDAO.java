@@ -5,7 +5,6 @@ import beans.Auction;
 import beans.Offer;
 import utils.AuctionDetailsInfo;
 import utils.AuctionFullInfo;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
