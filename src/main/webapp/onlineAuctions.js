@@ -40,7 +40,7 @@
         deadline.setMilliseconds(0);
         currDate.setSeconds(0);
         currDate.setMilliseconds(0);
-        var millisecondsDiff = deadline - currDate;
+        let millisecondsDiff = deadline - currDate;
         const millisecondsInDay = 1000 * 60 * 60 * 24;
         const millisecondsInHour = 1000 * 60 * 60;
         const millisecondsInMinute = 1000 * 60;
@@ -99,10 +99,10 @@
                 descriptioncell.textContent = article.description;
                 row.appendChild(descriptioncell);
                 // Cella per l'immagine
-                var imageCell = document.createElement('td');
-                var image = new Image();
-                var blob = new Blob([article.image], { type: 'image/jpeg' });
-                var blobUrl = URL.createObjectURL(blob);
+                let imageCell = document.createElement('td');
+                let image = new Image();
+                let blob = new Blob([article.image], { type: 'image/jpeg' });
+                let blobUrl = URL.createObjectURL(blob);
                 image.src = blobUrl;
                 imageCell.appendChild(image);
                 row.appendChild(imageCell);
