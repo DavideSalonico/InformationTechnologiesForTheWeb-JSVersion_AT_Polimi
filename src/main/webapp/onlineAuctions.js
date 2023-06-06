@@ -709,11 +709,14 @@
                 //let form = e.target.closest("form");
                 let articleSelector = document.getElementById("id_articleSelector");
                 let articleToAdd_id = articleSelector.value;
-                let articleToAdd = self.availableArticles.filter((el) => { return el.article_id === articleToAdd_id; })[0];
+                let articleToAdd = self.availableArticles.find((el) => {
+                    return el.article_id == articleToAdd_id;
+                });
+                //let articleToAdd = self.availableArticles.filter((el) => { return el.article_id === articleToAdd_id; })[0];
                 self.availableArticles = self.availableArticles.filter((el) => { return el.article_id !== articleToAdd_id; });
                 for (let i = 0; i < articleSelector.options.length; i++) {
-                    if (articleSelector.options[i].value === articleToAdd_id) {
-                        articleSelector.options[i].remove(i);
+                    if (articleSelector.options[i].value == articleToAdd_id) {
+                        articleSelector.options[i].remove();
                         break;
                     }
                 }
@@ -726,7 +729,7 @@
                 input.textContent = articleToAdd.name;
                 formfieldAuc.appendChild(input);
                  */
-                sellPage.start();
+                //sellPage.start();
                 this.update();
             });
 
