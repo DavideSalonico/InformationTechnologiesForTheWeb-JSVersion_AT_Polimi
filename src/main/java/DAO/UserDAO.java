@@ -1,25 +1,23 @@
 package DAO;
 
+import beans.User;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import beans.User;
 
 public class UserDAO {
 	private Connection connection;
 	private PreparedStatement pstatement = null;
 	private ResultSet result = null;
 
-	public UserDAO(){}
-
 	public UserDAO(Connection con) {
 		this.connection = con;
 	}
 	
 	public User checkCredentials(String username, String password) throws SQLException{
-		User user = null;
+		User user;
 		String query = "SELECT * FROM user WHERE username = ? AND password = ?";
 		try {
 			this.pstatement = connection.prepareStatement(query);

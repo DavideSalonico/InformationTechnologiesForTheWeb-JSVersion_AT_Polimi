@@ -108,7 +108,7 @@ public class OfferDAO {
 			throw new SQLException(e);
 		} finally {
 			try {
-				if(result == null) {
+				if(result != null) {
 					result.close();
 				}
 			} catch(Exception e1) {
@@ -124,7 +124,7 @@ public class OfferDAO {
 	}
 	
 	public int insertOffer(int price, LocalDateTime datetime, int user_id, int auction_id) throws SQLException{
-		int outcome = 0;
+		int outcome;
 		try {
 			pstatement = connection.prepareStatement("INSERT INTO offer (auction, user, price, time) VALUES(?, ?, ?, ?)");
 			pstatement.setInt(1, auction_id);

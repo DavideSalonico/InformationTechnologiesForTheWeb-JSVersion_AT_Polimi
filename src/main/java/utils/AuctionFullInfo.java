@@ -37,4 +37,8 @@ public class AuctionFullInfo {
         }
         this.maxOffer = maxOffer;
     }
+
+    public Auction getAuction() {
+        return auction;
+    }
 }

@@ -71,7 +71,7 @@ public class ArticleDAO {
 	
 	public List<Article> getAuctionArticles(int auction_id) throws SQLException{
 		List<Article> articles = new ArrayList<Article>();
-		Article article = new Article();
+		Article article;
 		String query = "SELECT * FROM article WHERE auction_id = ?";
 		try{
 			pstatement = connection.prepareStatement(query);

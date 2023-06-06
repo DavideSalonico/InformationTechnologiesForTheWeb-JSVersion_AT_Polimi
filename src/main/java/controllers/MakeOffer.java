@@ -48,6 +48,7 @@ public class MakeOffer extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// Page is a parameter that allows to distinguish between the dettagli.html and offerta.html pages
 		try{
+			// Preliminary checks
 			String strAucId = request.getParameter("auctionId");
 			Integer aucId = Integer.parseInt(strAucId);
 			makeOffer(request, response);
