@@ -23,14 +23,16 @@ public class LoginChecker implements Filter{
 
 		HttpSession s = req.getSession();
 		if (s.isNew() || s.getAttribute("user") == null) {
-			res.sendRedirect(loginpath);
+			res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			res.sendRedirect("GO TO : "+ loginpath + "and Login first !");
 			return;
 		}
 
 		try {
 	        chain.doFilter(request, response);
 	    } catch (IOException | ServletException e) {
-	        ((HttpServletResponse) response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to check the user id. Try again later");
+	        ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Not possible to check the user id. Try again later");
 	    }
 	}
 

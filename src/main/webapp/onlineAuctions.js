@@ -75,6 +75,12 @@
             let pricehead = document.createElement("td");
             pricehead.textContent = "Price";
             hrow.appendChild(pricehead);
+            let description = document.createElement("td");
+            description.textContent = "Description";
+            hrow.appendChild(description);
+            let image = document.createElement("td");
+            image.textContent = "Image";
+            hrow.appendChild(image);
             thead.appendChild(hrow);
             table.appendChild(thead);
             let tbody = document.createElement("tbody");
@@ -89,6 +95,17 @@
                 let pricecell = document.createElement("td");
                 pricecell.textContent = article.price;
                 row.appendChild(pricecell);
+                let descriptioncell = document.createElement("td");
+                descriptioncell.textContent = article.description;
+                row.appendChild(descriptioncell);
+                // Cella per l'immagine
+                var imageCell = document.createElement('td');
+                var image = new Image();
+                var blob = new Blob([article.image], { type: 'image/jpeg' });
+                var blobUrl = URL.createObjectURL(blob);
+                image.src = blobUrl;
+                imageCell.appendChild(image);
+                row.appendChild(imageCell);
                 tbody.appendChild(row);
             });
             table.appendChild(tbody);

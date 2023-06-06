@@ -158,11 +158,11 @@ public class AuctionDAO {
 
 	
 	public boolean changeAuctionStatus(int auction_id) throws SQLException{
-		int outcome = 0;
+		int outcome;
 		try {
 			pstatement = connection.prepareStatement("UPDATE auction SET open = 0 WHERE auction_id = ?");
 			pstatement.setInt(1, auction_id);
-			pstatement.executeUpdate();
+			outcome = pstatement.executeUpdate();
 			// If there is an affected row, it means that the auction has been closed
 			if(outcome > 0)
 				return true;
@@ -179,7 +179,7 @@ public class AuctionDAO {
 	}
 
 	public void setInitialPrice(int auction_id, int initialPrice) throws SQLException {
-		int outcome = -1;
+		int outcome;
 		try {
 			pstatement = connection.prepareStatement("UPDATE auction SET initial_price = ? WHERE auction_id = ?");
 			pstatement.setInt(1, initialPrice);
