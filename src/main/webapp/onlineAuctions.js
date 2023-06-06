@@ -647,8 +647,12 @@
 
         this.update = function(){
             if(this.availableArticles.length > 0){
+                let select = document.getElementById("id_articleSelector");
+
+                while (select.options.length > 0) {
+                    select.remove(0);
+                }
                 for(let i = 0; i < this.availableArticles.length; i++){
-                    let select = document.getElementById("id_articleSelector");
                     let opt = document.createElement("option");
                     opt.value = this.availableArticles[i].article_id;
                     opt.textContent = this.availableArticles[i].name;
@@ -713,7 +717,13 @@
                     return el.article_id == articleToAdd_id;
                 });
                 //let articleToAdd = self.availableArticles.filter((el) => { return el.article_id === articleToAdd_id; })[0];
-                self.availableArticles = self.availableArticles.filter((el) => { return el.article_id !== articleToAdd_id; });
+                let indexToRemove = self.availableArticles.findIndex((el) => {
+                    return el.article_id == articleToAdd_id;
+                });
+
+                if (indexToRemove !== -1) {
+                    self.availableArticles.splice(indexToRemove, 1);
+                }
                 for (let i = 0; i < articleSelector.options.length; i++) {
                     if (articleSelector.options[i].value == articleToAdd_id) {
                         articleSelector.options[i].remove();
