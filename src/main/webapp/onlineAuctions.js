@@ -632,8 +632,9 @@
                         if (req.status === 200) {
                             let arts = JSON.parse(message);
                             arts.forEach((art) => {
-                            // QUA FARE UN CONTROLLO PRIMA DI METTERLI DISPOINIBILI
-                                self.availableArticles.push(art);
+                                if (!self.selectedArticles.some((selectedArt) => selectedArt.article_id === art.article_id)) {
+                                    self.availableArticles.push(art);
+                                }
                             });
                             self.update();
                         } else if (req.status === 403) {
@@ -650,6 +651,8 @@
             if(this.availableArticles.length > 0){
                 let select = document.getElementById("id_articleSelector");
                 select.disabled = false;
+
+                // CANCELLA IL <p> dove dice di inserire un articolo !
                 while (select.options.length > 0) {
                     select.remove(0);
                 }
