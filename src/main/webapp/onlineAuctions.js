@@ -632,6 +632,7 @@
                         if (req.status === 200) {
                             let arts = JSON.parse(message);
                             arts.forEach((art) => {
+                            // QUA FARE UN CONTROLLO PRIMA DI METTERLI DISPOINIBILI
                                 self.availableArticles.push(art);
                             });
                             self.update();
@@ -648,7 +649,7 @@
         this.update = function(){
             if(this.availableArticles.length > 0){
                 let select = document.getElementById("id_articleSelector");
-
+                select.disabled = false;
                 while (select.options.length > 0) {
                     select.remove(0);
                 }
