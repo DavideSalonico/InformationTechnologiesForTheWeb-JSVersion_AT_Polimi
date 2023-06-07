@@ -664,6 +664,8 @@
                 let par = document.createElement("p");
                 par.textContent = "First of all, insert an article";
                 div.appendChild(par);
+                let select = document.getElementById("id_articleSelector");
+                select.disabled = true;
             }
 
             if(this.selectedArticles.length > 0){
