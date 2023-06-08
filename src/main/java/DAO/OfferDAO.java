@@ -34,7 +34,7 @@ public class OfferDAO {
 				off.setPrice(result.getInt("price"));
 				off.setTime(result.getObject("time", LocalDateTime.class));
 				//SO THE CLIENT CAN'T SEE THE USER ID
-				off.setUser(result.getInt("user"));
+				off.setUser(0);
 				off.setAuction(result.getInt("auction"));
 				String username = result.getString("username");
 				offers.add(new Pair<>(off,username));
@@ -68,7 +68,7 @@ public class OfferDAO {
 				off.setOffer_id(result.getInt("offer_id"));
 				off.setPrice(result.getInt("price"));
 				off.setTime(result.getObject("time", LocalDateTime.class));
-				off.setUser(result.getInt("user"));
+				off.setUser(0);
 				off.setAuction(result.getInt("auction"));
 			}
 		} catch(SQLException e) {
@@ -100,7 +100,7 @@ public class OfferDAO {
 				off.setOffer_id(result.getInt("offer_id"));
 				off.setPrice(result.getInt("price"));
 				off.setTime(result.getObject("time", LocalDateTime.class));
-				off.setUser(result.getInt("user"));
+				off.setUser(0);
 				off.setAuction(result.getInt("auction"));	
 			}
 		} catch(SQLException e) {

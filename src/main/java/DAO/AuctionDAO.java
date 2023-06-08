@@ -324,7 +324,7 @@ public class AuctionDAO {
 		Auction auction = new Auction();
 		auction.setAuction_id(result.getInt("auction_id"));
 		auction.setOpen(result.getBoolean("open"));
-		auction.setCreator(result.getInt("creator"));
+		auction.setCreator(0);
 		auction.setInitial_price(result.getInt("initial_price"));
 		auction.setMinimum_raise(result.getInt("minimum_raise"));
 		auction.setExpiring_date(result.getTimestamp("expiring_date").toLocalDateTime());
@@ -337,7 +337,7 @@ public class AuctionDAO {
 		article.setName(result.getString("name"));
 		article.setDescription(result.getString("description"));
 		article.setImage(result.getBlob("image"));
-		article.setArticle_creator(result.getInt("article_creator"));
+		article.setArticle_creator(0);
 		article.setAuction_id(result.getInt("auction_id"));
 		article.setPrice(result.getInt("price"));
 
@@ -348,7 +348,7 @@ public class AuctionDAO {
 		Offer offer = new Offer();
 		offer.setOffer_id(result.getInt("offer_id"));
 		offer.setAuction(result.getInt("auction"));
-		offer.setUser(result.getInt("user"));
+		offer.setUser(0);
 		offer.setPrice(result.getInt("offer_price"));
 		Timestamp ldt = result.getTimestamp("time");
 		if(ldt != null)
