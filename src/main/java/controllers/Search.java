@@ -1,6 +1,5 @@
 package controllers;
 
-import DAO.ArticleDAO;
 import DAO.AuctionDAO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,12 +27,10 @@ public class Search extends HttpServlet {
 	private Connection connection = null;
 
 	AuctionDAO auctionDAO;
-	ArticleDAO articleDAO;
 
 	public void init() throws ServletException {
 		connection = ConnectionHandler.getConnection(getServletContext());
 		auctionDAO = new AuctionDAO(connection);
-		articleDAO = new ArticleDAO(connection);
 	}
 
 	public void destroy() {

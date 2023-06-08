@@ -35,6 +35,14 @@
         this.minutes = minutes;
     }
 
+    function encodeBase64FromArray(array) {
+        let binary = '';
+        for (let i = 0; i < array.length; i++) {
+            binary += String.fromCharCode(array[i]);
+        }
+        return btoa(binary);
+    }
+
     function timeDifference(deadline, currDate){
         deadline.setSeconds(0);
         deadline.setMilliseconds(0);
@@ -100,11 +108,11 @@
                 row.appendChild(descriptioncell);
                 // Cella per l'immagine
                 let imageCell = document.createElement('td');
-                let image = new Image();
-                let blob = new Blob([article.image], { type: 'image/jpeg' });
-                let blobUrl = URL.createObjectURL(blob);
-                image.src = blobUrl;
-                imageCell.appendChild(image);
+                let imagetag = document.createElement('img');
+                //let imageURL = URL.createObjectURL(new Blob(article.imageBytes, {type: 'image/*'}));
+                let base64Image = encodeBase64FromArray(new Uint8Array(article.imageBytes));
+                imagetag.src = 'data:image/jpeg;base64,' + base64Image;
+                imageCell.appendChild(imagetag);
                 row.appendChild(imageCell);
                 tbody.appendChild(row);
             });
@@ -157,10 +165,15 @@
             }, false);
 
             this.logout.addEventListener('click', () => {
-                window.sessionStorage.removeItem('username');
-                window.location.href = "home.html";
+               logout();
             }, false);
         }
+    }
+
+    function logout(){
+        window.sessionStorage.clear();
+        window.localStorage.clear();
+        window.location.href = "home.html";
     }
 
     //il parametro della keyword lo passo con "key" nel form appeso all'url (e non la chiave)
@@ -196,8 +209,7 @@
                                 let currDate = new Date();
                                 self.searchedAuctionContainer.update(stillValidAuctions, currDate);
                             } else if (req.status === 403) {
-                                sessionStorage.removeItem('username');
-                                window.location.href = "home.html";
+                                logout();
                             } else {
                                 self.alert.textContent = message;
                             }
@@ -230,8 +242,7 @@
                                 //self.reset(); // to delete the inserted key in the form
                             }
                             else if(req.status === 403){
-                                window.location.href = req.getResponseHeader("Location");
-                                window.sessionStorage.removeItem('username');
+                                logout();
                             }
                             else{
                                 self.alert.textContent = message;
@@ -273,7 +284,7 @@
                         const entries = Object.entries(parsedAuctions);
                         map = new Map(entries);
                     }
-                    map.set(auctionId, new Date());
+                    map.set(aucFullInfo.auction.auctionId, new Date());
                     localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
                 });
                 table = document.createElement("table");
@@ -340,8 +351,7 @@
                             let wonOffers = JSON.parse(req.responseText);
                             self.update(wonOffers);
                         } else if (req.status === 403) {
-                            window.location.href = req.getResponseHeader("Location");
-                            window.sessionStorage.removeItem('username');
+                            logout();
                         }
                         else {
                             self.alert.textContent = message;
@@ -417,8 +427,7 @@
                             let Auctions = JSON.parse(req.responseText);
                             self.update(Auctions);
                         } else if (req.status === 403) {
-                            window.location.href = req.getResponseHeader("Location");
-                            window.sessionStorage.removeItem('username');
+                            logout();
                         }
                         else {
                             self.alert.textContent = message;
@@ -593,8 +602,7 @@
                                     localStorage.setItem("lastActionWasCreateAuction", "false");
                                     self.createAuctionWizard.show();
                                 } else if (req.status === 403) {
-                                    window.location.href = req.getResponseHeader("Location");
-                                    window.sessionStorage.removeItem('username');
+                                    logout();
                                 } else {
                                     self.alert.textContent = message;
                                 }
@@ -638,8 +646,7 @@
                             });
                             self.update();
                         } else if (req.status === 403) {
-                            window.location.href = req.getResponseHeader("Location");
-                            window.sessionStorage.removeItem('username');
+                            logout();
                         } else {
                             self.alert.textContent = message;
                         }
@@ -649,6 +656,9 @@
 
         this.update = function(){
             if(this.availableArticles.length > 0){
+                let par = document.getElementById("id_firstOfAll");
+                par.textContent = "";
+
                 let select = document.getElementById("id_articleSelector");
                 select.disabled = false;
 
@@ -664,10 +674,8 @@
                 }
             }
             else{
-                let div = this.addArticleToAuctionButton.closest("div");
-                let par = document.createElement("p");
+                let par = document.getElementById("id_firstOfAll");
                 par.textContent = "First of all, insert an article";
-                div.appendChild(par);
                 let select = document.getElementById("id_articleSelector");
                 select.disabled = true;
             }
@@ -770,8 +778,7 @@
                                     self.show();
                                 }
                                 else if (req.status === 403) {
-                                    window.location.href = req.getResponseHeader("Location");
-                                    window.sessionStorage.removeItem('username');
+                                    logout();
                                 }
                                 else {
                                     self.alert.textContent = message;
@@ -883,8 +890,7 @@
                             self.update(aucDetails);
                             offerList.update(aucDetails);
                         } else if (req.status === 403) {
-                            window.location.href = req.getResponseHeader("Location");
-                            window.sessionStorage.removeItem('username');
+                            logout();
                         } else {
                             self.alert.textContent = message;
                         }
@@ -967,8 +973,7 @@
                             if (req.status === 200) {
                                 pageOrchestrator.renderOffers(auctionId);
                             } else if (req.status === 403) {
-                                window.location.href = req.getResponseHeader("Location");
-                                window.sessionStorage.removeItem('username');
+                                logout();
                             } else {
                                 self.alert.textContent = message;
                             }
@@ -1000,8 +1005,7 @@
                             let expired = expiringTime - currTime <= 0;
                             aucCloser.show(auctionId, aucDetails.auction.open, aucDetails.winner, expired);
                         } else if (req.status === 403) {
-                            window.location.href = req.getResponseHeader("Location");
-                            window.sessionStorage.removeItem('username');
+                            logout();
                         } else {
                             self.alert.textContent = message;
                         }
@@ -1096,8 +1100,7 @@
                                     sellPage.start();
                                     pageOrchestrator.renderSell();
                                 } else if (req.status === 403) {
-                                    window.location.href = req.getResponseHeader("Location");
-                                    window.sessionStorage.removeItem('username');
+                                    logout();
                                 } else {
                                     self.alert.textContent = message;
                                 }

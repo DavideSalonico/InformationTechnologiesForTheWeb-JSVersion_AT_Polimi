@@ -37,7 +37,6 @@ public class AuctionDAO {
 				resultSet.close();
 			}
 		} catch(SQLException e) {
-			e.printStackTrace();
 			throw new SQLException(e);
 		} finally {
 			try {
@@ -74,7 +73,6 @@ public class AuctionDAO {
 				}
 			}
 		} catch(SQLException e) {
-			e.printStackTrace();
 			throw new SQLException(e);
 		} finally {
 			try {
@@ -111,7 +109,6 @@ public class AuctionDAO {
 			}
 			elem = new AuctionDetailsInfo(auction, articles, null, null);
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new SQLException(e);
 		} finally {
 			try {
@@ -138,7 +135,6 @@ public class AuctionDAO {
 			if(result.next())
 				auction = resultToAuction(result);
 		} catch (SQLException e) {
-		    e.printStackTrace();
 			throw new SQLException(e);
 
 		} finally {
@@ -167,7 +163,6 @@ public class AuctionDAO {
 			if(outcome > 0)
 				return true;
 		} catch (SQLException e) {
-		    e.printStackTrace();
 			throw new SQLException(e);
 		} finally {
 			try {
@@ -189,7 +184,6 @@ public class AuctionDAO {
 				throw new SQLException("No auction with id " + auction_id + " found");
 
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new SQLException(e);
 		} finally {
 			try {
@@ -260,7 +254,6 @@ public class AuctionDAO {
 
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new SQLException(e);
 
 		} finally {
@@ -310,7 +303,6 @@ public class AuctionDAO {
 
 
 		} catch (SQLException e) {
-			e.printStackTrace();
 			throw new SQLException(e);
 
 		} finally {
@@ -362,6 +354,56 @@ public class AuctionDAO {
 		if(ldt != null)
 			offer.setTime(ldt.toLocalDateTime());
 		return offer;
+	}
+
+	public List<AuctionFullInfo> getOfferWithArticle(int user_id) throws SQLException{
+		List<AuctionFullInfo> auctions = new ArrayList<>();
+		try {
+			pstatement = connection.prepareStatement("""
+					SELECT *, o.price AS offer_price
+					FROM auction au
+					JOIN article ar ON au.auction_id = ar.auction_id
+					LEFT JOIN (
+					    SELECT o1.*
+					    FROM offer o1
+					    INNER JOIN (
+					        SELECT o3.auction, MAX(o3.price) AS max_price
+					        FROM offer o3
+					        GROUP BY o3.auction
+					    ) o2 ON o1.auction = o2.auction AND o1.price = o2.max_price
+					) o ON o.auction = au.auction_id
+					WHERE user = ?;""");
+			pstatement.setInt(1, user_id);
+			result = pstatement.executeQuery();
+			int prev_auction_id = -1;
+			while(result.next()) {
+				if(result.getInt("auction_id") != prev_auction_id){
+					List<Article> articles = new ArrayList<>();
+					articles.add(resultToArticle(result));
+					auctions.add(new AuctionFullInfo(resultToAuction(result), articles, resultToOffer(result)));
+					prev_auction_id = result.getInt("auction_id");
+				}
+				else{
+					auctions.get(auctions.size()-1).addArticle(resultToArticle(result));
+				}
+
+			}
+		} catch (SQLException e) {
+			throw new SQLException(e);
+
+		} finally {
+			try {
+				result.close();
+			} catch (Exception e1) {
+				throw new SQLException(e1);
+			}
+			try {
+				pstatement.close();
+			} catch (Exception e2) {
+				throw new SQLException(e2);
+			}
+		}
+		return auctions;
 	}
 
 }

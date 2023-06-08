@@ -72,7 +72,7 @@ public class LastVisited extends HttpServlet {
                 AuctionFullInfo auctionFullInfo = auctionDAO.getAuctionFullInfo(id);
                 // CHECK : if the auction is open, it is added to the list so the user can see only the open auctions visited
                 if(auctionFullInfo.getAuction().isOpen())
-                    finalAuctionsInfo.add(auctionDAO.getAuctionFullInfo(id));
+                    finalAuctionsInfo.add(auctionFullInfo);
             }
         }catch(SQLException e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

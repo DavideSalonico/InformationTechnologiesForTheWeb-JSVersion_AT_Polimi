@@ -23,8 +23,7 @@ public class LoginChecker implements Filter{
 
 		HttpSession s = req.getSession();
 		if (s.isNew() || s.getAttribute("user") == null) {
-			res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			res.sendRedirect("GO TO : "+ loginpath + "and Login first !");
+			res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "GO TO : "+ loginpath + "and Login first !");
 			return;
 		}
 

@@ -44,7 +44,6 @@ public class CreateAuction extends HttpServlet {
 			ConnectionHandler.closeConnection(connection);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			//TODO: show error page, not just stacktrace
 		}
 	}
 
@@ -79,16 +78,17 @@ public class CreateAuction extends HttpServlet {
 			}
 			creator = (((User) request.getSession().getAttribute("user")).getUser_id());
 
-			String[] tmpString = request.getParameterValues("articlesSelected" );
+			String tmpString = request.getParameter("articlesSelected" );
 			if( tmpString == null ) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				response.getWriter().println("No articles selected to add to the auction");
 				return;
 			}
-			for (String s : tmpString) {
-				articlesToAdd.add(Integer.parseInt(s));
-			}
 
+			String[] splittedStr = tmpString.split(",");
+			for (String num : splittedStr){
+				articlesToAdd.add(Integer.parseInt(num));
+			}
 		} catch (NumberFormatException e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Incorrect input");

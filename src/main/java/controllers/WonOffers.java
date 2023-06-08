@@ -1,8 +1,8 @@
 package controllers;
 
 import DAO.ArticleDAO;
+import DAO.AuctionDAO;
 import DAO.OfferDAO;
-import beans.Offer;
 import beans.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet("/WonOffers")
 public class WonOffers extends HttpServlet {
@@ -31,11 +30,15 @@ public class WonOffers extends HttpServlet {
 	private Connection connection = null;
 	ArticleDAO articleDAO;
 	OfferDAO offerDAO;
+	AuctionDAO auctionDAO;
+
+	//TODO: JOIN IN MEMORIA
 
 	public void init() throws ServletException {
 		connection = ConnectionHandler.getConnection(getServletContext());
 		articleDAO = new ArticleDAO(connection);
 		offerDAO = new OfferDAO(connection);
+		auctionDAO = new AuctionDAO(connection);
 	}
 
 	public void destroy() {
@@ -59,16 +62,12 @@ public class WonOffers extends HttpServlet {
 		}
 
 		try{
-			Map<Integer, Offer> winningOffers = offerDAO.getWinningOfferByUser(user.getUser_id());
-			for(Integer auction : winningOffers.keySet()){
-				wonOffers.add(new AuctionFullInfo(auction, articleDAO.getAuctionArticles(auction), winningOffers.get(auction)));
-			}
+			wonOffers = auctionDAO.getOfferWithArticle(user.getUser_id());
 		} catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Not possible to recover the winning offers");
 			return;
 		}
-
 
 		Gson gson = new GsonBuilder()
 				.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())

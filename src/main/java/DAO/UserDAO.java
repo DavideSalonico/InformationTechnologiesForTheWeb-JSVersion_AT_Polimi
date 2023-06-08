@@ -18,7 +18,7 @@ public class UserDAO {
 	
 	public User checkCredentials(String username, String password) throws SQLException{
 		User user;
-		String query = "SELECT * FROM user WHERE username = ? AND password = ?";
+		String query = "SELECT * FROM user WHERE BINARY username = ? AND BINARY password = ?";
 		try {
 			this.pstatement = connection.prepareStatement(query);
 			// This sets the user_id as first parameter of the query

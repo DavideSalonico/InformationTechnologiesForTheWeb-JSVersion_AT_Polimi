@@ -47,43 +47,53 @@ public class CreateArticle extends HttpServlet {
 
 
 			if(name == null || name.isEmpty()){
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or empty name value");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Missing or empty name value");
 				return;
 			}
 			if(description == null || description.isEmpty()){
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or empty description value");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Missing or empty description value");
 				return;
 			}
 			if(article_creator == 0){
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing article creator value");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Missing article creator value");
 				return;
 			}
 			if(price == 0){
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing price value");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Missing price value");
 				return;
 			}
 		} catch (NumberFormatException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect values");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Incorrect values");
 			return;
 		} catch (ServletException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to get the image");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Unable to get the image");
 			return;
 		}
 
 		if(name.length() < 4 || name.length() > 255 ) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Name must be between 4 and 255 characters");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Name must be between 4 and 255 characters");
 			return;
 		}
 		if(description.length() < 10 || description.length() > 255){
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Description must be between 4 and 255 characters");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Description must be between 4 and 255 characters");
 			return;
 		}
 		if(price <= 0 || price > 1000000000){
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Price must be between 1 and 1000000000");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Price must be between 1 and 1000000000");
 			return;
 		}
 		if(article_creator <= 0) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unable to read article creator, must be a positive integer");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Unable to read article creator, must be a positive integer");
 			return;
 		}
 
@@ -95,7 +105,8 @@ public class CreateArticle extends HttpServlet {
 			articleDAO.insertArticle(name, description, price, article_creator, imageStream);
 		}
 		catch(SQLException e){
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to insert a new article into database");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Unable to insert a new article into database");
 			return; 
 		}
 		response.setStatus(HttpServletResponse.SC_OK);
@@ -110,6 +121,7 @@ public class CreateArticle extends HttpServlet {
 	}
 
 	private InputStream checkImage(Part image, HttpServletResponse response) throws IOException {
+		final long maxSize = 2 * 1024 * 1024; // 2MB
 		if (image != null) {
 			InputStream imgStream;
 			String mimeType;
@@ -120,10 +132,20 @@ public class CreateArticle extends HttpServlet {
 			// And if he doesn't upload a file, mimeType is null and this would result in an unexpected server error
 			if (mimeType != null)
 				// Checks if the uploaded file is an image and if it has been parsed correclty
-				if (imgStream != null && imgStream.available() > 0 && mimeType.startsWith("image/"))
-					return imgStream;
+				if (mimeType != null && imgStream != null && imgStream.available() > 0 && mimeType.startsWith("image/")) {
+					long fileSize = image.getSize();
+					if (fileSize <= maxSize) {
+						return imgStream;
+					} else {
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().println("Image size exceeds the maximum limit (2MB)");
+						imgStream.close();
+						return null;
+					}
+				}
 		} else{
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Wrong image format");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Wrong image format");
 			return null;
 		}
 		return null;
