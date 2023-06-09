@@ -745,15 +745,6 @@
                     }
                 }
                 self.selectedArticles.push(articleToAdd);
-                /*
-                let formfieldAuc = this.createAuctionButton.closest("fieldset");
-                let input = document.createElement("input");
-                input.style.display = "none";
-                input.value = articleToAdd.article_id;
-                input.textContent = articleToAdd.name;
-                formfieldAuc.appendChild(input);
-                 */
-                //sellPage.start();
                 this.update();
             });
 

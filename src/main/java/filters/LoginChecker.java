@@ -19,19 +19,19 @@ public class LoginChecker implements Filter{
 		// java.lang.String login path = "/index.html";
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
-		String loginpath = req.getServletContext().getContextPath() + "/index.html";
 
 		HttpSession s = req.getSession();
 		if (s.isNew() || s.getAttribute("user") == null) {
-			res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "GO TO : "+ loginpath + "and Login first !");
+			res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			res.getWriter().println("You are not logged in. Please, log in first");
 			return;
 		}
 
 		try {
 	        chain.doFilter(request, response);
-	    } catch (IOException | ServletException e) {
-	        ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Not possible to check the user id. Try again later");
+	    } catch (ServletException e) {
+	        res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			res.getWriter().println("Not possible to check the user id. Try again later");
 	    }
 	}
 
