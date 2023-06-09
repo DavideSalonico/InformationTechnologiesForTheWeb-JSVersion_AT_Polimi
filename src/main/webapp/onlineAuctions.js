@@ -615,12 +615,13 @@
         }
     }
 
-    function CreateAuctionWizard(_addArticleToAuctionButton, _createAuctionButton){
+    function CreateAuctionWizard(_addArticleToAuctionButton, _createAuctionButton, openAucList){
         this.addArticleToAuctionButton = _addArticleToAuctionButton;
         this.createAuctionButton = _createAuctionButton;
         this.availableArticles = [];
         this.selectedArticles = [];
         this.alert = document.getElementById("id_alert");
+        this.openAucList = openAucList;
 
         this.show = function(){
             let self = this;
@@ -745,15 +746,6 @@
                     }
                 }
                 self.selectedArticles.push(articleToAdd);
-                /*
-                let formfieldAuc = this.createAuctionButton.closest("fieldset");
-                let input = document.createElement("input");
-                input.style.display = "none";
-                input.value = articleToAdd.article_id;
-                input.textContent = articleToAdd.name;
-                formfieldAuc.appendChild(input);
-                 */
-                //sellPage.start();
                 this.update();
             });
 
@@ -776,6 +768,7 @@
                                     self.availableArticles = [];
                                     self.selectedArticles = [];
                                     self.show();
+                                    self.openAucList.show();
                                 }
                                 else if (req.status === 403) {
                                     logout();
@@ -831,7 +824,7 @@
             auctionList = new AuctionLists(document.getElementById("id_openAuctions"), document.getElementById("id_closedAuctions"));
             auctionList.show();
 
-            createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_addToAuctionButton"), document.getElementById("id_createAuctionButton"));
+            createAuctionWizard = new CreateAuctionWizard(document.getElementById("id_addToAuctionButton"), document.getElementById("id_createAuctionButton"), auctionList);
             createAuctionWizard.show();
             createAuctionWizard.registerEvents();
 

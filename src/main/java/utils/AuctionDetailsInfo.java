@@ -22,7 +22,7 @@ public class AuctionDetailsInfo {
     }
 
     public void addWinner(User winner) {
-    	winner.setUser_id(0); //Not to show user_id to the client
+    	this.winner.setUser_id(0); //Not to show user_id to the client
         this.winner = winner;
     }
 
