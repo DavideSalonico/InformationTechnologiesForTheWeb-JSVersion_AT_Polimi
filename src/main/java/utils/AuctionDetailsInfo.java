@@ -23,8 +23,8 @@ public class AuctionDetailsInfo {
 
     public void addWinner(User winner) {
         this.winner = winner;
-        this.winner.setUser_id(0); //Not to show user_id to the client
-
+        if(this.winner != null)
+            this.winner.setUser_id(0); //Not to show user_id to the client
     }
 
     public void addOfferWinner(List<Pair<Offer,String>> copy, User awardedUser) {
@@ -33,8 +33,7 @@ public class AuctionDetailsInfo {
             pair.getFirst().setUser(0); //Not to show user_id to the client
         }
         if(!auction.isOpen()){
-            if(awardedUser != null)
-                addWinner(awardedUser);
+            addWinner(awardedUser);
         }
     }
 
