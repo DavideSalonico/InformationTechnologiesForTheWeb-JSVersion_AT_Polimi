@@ -3,6 +3,13 @@
     let loginBanner, menu, purchasePage, sellPage, offerPage, auctionDetailsPage, pageOrchestrator;
     let alertContainer = document.getElementById("id_alert");
 
+    function redirectToDiv(elementId) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
     pageOrchestrator = new PageOrchestrator();
 
     function saveUserMap(userMap) {
@@ -68,7 +75,6 @@
                 saveUserMap(userMap); // Salva la mappa aggiornata nel localStorage
                 pageOrchestrator.renderPurchase();
             }
-
         }
     }, false);
 
@@ -216,6 +222,7 @@
 
     function logout(){
         window.sessionStorage.clear();
+        //window.localStorage.clear();
         window.location.href = "home.html";
     }
 
@@ -234,37 +241,31 @@
         this.specialShow = function() {
             let self = this;
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
+            let lastVisitedAuctions = localStorage.getItem('visitedAuctions');
+            let lVA = new Map();
+            if (lastVisitedAuctions != null && lVA.size !== 0) {
+                lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
 
-            let userMap = loadUserMap();
-            let username = sessionStorage.getItem('username');
-            if (username && userMap.has(username)) {
-                let myMap = userMap.get(username);
-                myMap = new Map(Object.entries(myMap));
-                let lastVisitedAuctions = myMap.get('visitedAuctions');
-                let lVA = new Map();
-                if (lastVisitedAuctions != null && lVA.size !== 0) {
-                    lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
+                // Convert the values of lVA map to an array of integers
+                let lVAValuesArray = Array.from(lVA.keys());
+                // or: let lVAValuesArray = [...lVA.values()];
 
-                    // Convert the values of lVA map to an array of integers
-                    let lVAValuesArray = Array.from(lVA.keys());
-                    // or: let lVAValuesArray = [...lVA.values()];
-
-                    makeCall("GET", 'LastVisited?lVA=' + lVAValuesArray.join(','), null,
-                        function(req) {
-                            if (req.readyState === 4) {
-                                let message = req.responseText;
-                                if (req.status === 200) {
-                                    let stillValidAuctions = JSON.parse(req.responseText);
-                                    let currDate = new Date();
-                                    self.searchedAuctionContainer.update(stillValidAuctions, currDate);
-                                } else if (req.status === 403) {
-                                    logout();
-                                } else {
-                                    self.alert.textContent = message;
-                                }
+                makeCall("GET", 'LastVisited?lVA=' + lVAValuesArray.join(','), null,
+                    function(req) {
+                        if (req.readyState === 4) {
+                            let message = req.responseText;
+                            if (req.status === 200) {
+                                let stillValidAuctions = JSON.parse(req.responseText);
+                                let currDate = new Date();
+                                self.searchedAuctionContainer.update(stillValidAuctions, currDate);
+                            } else if (req.status === 403) {
+                                logout();
+                            } else {
+                                self.alert.textContent = message;
+                                redirectToDiv('id_alert');
                             }
-                        });
-                }
+                        }
+                    });
             }
         };
 
@@ -279,6 +280,7 @@
                     let key = form.querySelector("input").value;
                     if(key === ""){
                        self.alert.textContent = "Insert a keyword";
+                        redirectToDiv('id_alert');
                         return;
                     }
                     makeCall("GET", 'Search?key=' + key,null,
@@ -297,6 +299,7 @@
                             }
                             else{
                                 self.alert.textContent = message;
+                                redirectToDiv('id_alert');
                             }
                         }
                     })
@@ -416,6 +419,7 @@
                         }
                         else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -492,6 +496,7 @@
                         }
                         else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -675,6 +680,7 @@
                                     logout();
                                 } else {
                                     self.alert.textContent = message;
+                                    redirectToDiv('id_alert');
                                 }
                             }
                         })
@@ -720,6 +726,7 @@
                             logout();
                         } else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -801,7 +808,6 @@
                 let articleToAdd = self.availableArticles.find((el) => {
                     return el.article_id == articleToAdd_id;
                 });
-                //let articleToAdd = self.availableArticles.filter((el) => { return el.article_id === articleToAdd_id; })[0];
                 let indexToRemove = self.availableArticles.findIndex((el) => {
                     return el.article_id == articleToAdd_id;
                 });
@@ -854,6 +860,7 @@
                                 }
                                 else {
                                     self.alert.textContent = message;
+                                    redirectToDiv('id_alert');
                                 }
                             }
                     });
@@ -965,6 +972,7 @@
                             logout();
                         } else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -1048,6 +1056,7 @@
                                 logout();
                             } else {
                                 self.alert.textContent = message;
+                                redirectToDiv('id_alert');
                             }
                         }
                     });
@@ -1080,6 +1089,7 @@
                             logout();
                         } else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -1175,6 +1185,7 @@
                                     logout();
                                 } else {
                                     self.alert.textContent = message;
+                                    redirectToDiv('id_alert');
                                 }
                             }
                         });
@@ -1334,6 +1345,8 @@
                 userMap.set(username, myMap);
                 saveUserMap(userMap); // Save the updated user map in localStorage
             }
+            map.set(auctionId, new Date());
+            localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
         }
 
         this.renderAuctionDetails = function(auctionId){
