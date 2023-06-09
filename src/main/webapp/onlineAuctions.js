@@ -11,12 +11,24 @@
         } else {
             pageOrchestrator.start();
             let hasLoggedBefore = localStorage.getItem('hasLoggedBefore');
-            if(hasLoggedBefore){
-                if(localStorage.getItem('lastActionWasCreateAuction') === "true"){
+            if(hasLoggedBefore) {
+                if (localStorage.getItem('lastActionWasCreateAuction') === "true") {
                     pageOrchestrator.renderSell();
-                }
-                else{
+                } else {
                     pageOrchestrator.renderSpecialPurchase();
+                }
+                let lastVisitedAuctions = localStorage.getItem('visitedAuctions');
+                let lVA = new Map();
+                //Deletes all the auctions visited more than 30 days ago
+                if (lastVisitedAuctions != null) {
+                    lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
+                    for (let [key, value] of lVA.entries()) {
+                        let date = new Date(value);
+                        if (new DiffDate(date, new Date()).days > 30) {
+                            lVA.delete(key);
+                        }
+                    }
+                    localStorage.setItem('visitedAuctions', JSON.stringify(Array.from(lVA.entries())));
                 }
             }
             else{
@@ -172,7 +184,7 @@
 
     function logout(){
         window.sessionStorage.clear();
-        window.localStorage.clear();
+        //window.localStorage.clear();
         window.location.href = "home.html";
     }
 
@@ -193,7 +205,7 @@
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
             let lastVisitedAuctions = localStorage.getItem('visitedAuctions');
             let lVA = new Map();
-            if (lastVisitedAuctions != null) {
+            if (lastVisitedAuctions != null && lVA.size !== 0) {
                 lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
 
                 // Convert the values of lVA map to an array of integers
