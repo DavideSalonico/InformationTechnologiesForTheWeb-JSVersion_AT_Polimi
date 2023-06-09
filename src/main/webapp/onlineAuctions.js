@@ -3,6 +3,13 @@
     let loginBanner, menu, purchasePage, sellPage, offerPage, auctionDetailsPage, pageOrchestrator;
     let alertContainer = document.getElementById("id_alert");
 
+    function redirectToDiv(elementId) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
     pageOrchestrator = new PageOrchestrator();
 
     window.addEventListener("load", () => {
@@ -224,6 +231,7 @@
                                 logout();
                             } else {
                                 self.alert.textContent = message;
+                                redirectToDiv('id_alert');
                             }
                         }
                     });
@@ -240,6 +248,7 @@
                     let key = form.querySelector("input").value;
                     if(key === ""){
                        self.alert.textContent = "Insert a keyword";
+                        redirectToDiv('id_alert');
                         return;
                     }
                     makeCall("GET", 'Search?key=' + key,null,
@@ -258,6 +267,7 @@
                             }
                             else{
                                 self.alert.textContent = message;
+                                redirectToDiv('id_alert');
                             }
                         }
                     })
@@ -368,6 +378,7 @@
                         }
                         else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -444,6 +455,7 @@
                         }
                         else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -618,6 +630,7 @@
                                     logout();
                                 } else {
                                     self.alert.textContent = message;
+                                    redirectToDiv('id_alert');
                                 }
                             }
                         })
@@ -663,6 +676,7 @@
                             logout();
                         } else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -744,7 +758,6 @@
                 let articleToAdd = self.availableArticles.find((el) => {
                     return el.article_id == articleToAdd_id;
                 });
-                //let articleToAdd = self.availableArticles.filter((el) => { return el.article_id === articleToAdd_id; })[0];
                 let indexToRemove = self.availableArticles.findIndex((el) => {
                     return el.article_id == articleToAdd_id;
                 });
@@ -788,6 +801,7 @@
                                 }
                                 else {
                                     self.alert.textContent = message;
+                                    redirectToDiv('id_alert');
                                 }
                             }
                     });
@@ -899,6 +913,7 @@
                             logout();
                         } else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -982,6 +997,7 @@
                                 logout();
                             } else {
                                 self.alert.textContent = message;
+                                redirectToDiv('id_alert');
                             }
                         }
                     });
@@ -1014,6 +1030,7 @@
                             logout();
                         } else {
                             self.alert.textContent = message;
+                            redirectToDiv('id_alert');
                         }
                     }
                 });
@@ -1109,6 +1126,7 @@
                                     logout();
                                 } else {
                                     self.alert.textContent = message;
+                                    redirectToDiv('id_alert');
                                 }
                             }
                         });
