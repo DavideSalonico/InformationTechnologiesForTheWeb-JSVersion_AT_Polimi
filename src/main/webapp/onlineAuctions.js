@@ -284,7 +284,8 @@
                         const entries = Object.entries(parsedAuctions);
                         map = new Map(entries);
                     }
-                    map.set(aucFullInfo.auction.auctionId, new Date());
+                    if(aucFullInfo.auction.auctionId != null)
+                        map.set(aucFullInfo.auction.auctionId, new Date());
                     localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
                 });
                 table = document.createElement("table");

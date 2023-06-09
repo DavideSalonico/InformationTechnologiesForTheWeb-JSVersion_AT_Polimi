@@ -130,24 +130,22 @@ public class CreateArticle extends HttpServlet {
 			mimeType = getServletContext().getMimeType(filename);
 			// Since the user could edit the html page, he could change the input type of the image
 			// And if he doesn't upload a file, mimeType is null and this would result in an unexpected server error
-			if (mimeType != null)
-				// Checks if the uploaded file is an image and if it has been parsed correclty
-				if (mimeType != null && imgStream != null && imgStream.available() > 0 && mimeType.startsWith("image/")) {
-					long fileSize = image.getSize();
-					if (fileSize <= maxSize) {
-						return imgStream;
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						response.getWriter().println("Image size exceeds the maximum limit (2MB)");
-						imgStream.close();
-						return null;
-					}
-				}
-		} else{
+
+			// Checks if the uploaded file is an image and if it has been parsed correclty
+			if (mimeType != null && imgStream != null && imgStream.available() > 0 && mimeType.startsWith("image/") && image.getSize() <= maxSize) {
+				return imgStream;
+			}
+			else {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Image size exceeds the maximum limit (2MB)");
+				imgStream.close();
+				return null;
+			}
+		}
+		else{
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Wrong image format");
 			return null;
 		}
-		return null;
 	}
 }
