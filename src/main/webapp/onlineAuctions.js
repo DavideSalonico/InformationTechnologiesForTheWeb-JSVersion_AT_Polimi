@@ -742,7 +742,7 @@
                 for (let i = 0; i < articleSelector.options.length; i++) {
                     if (articleSelector.options[i].value == articleToAdd_id) {
                         articleSelector.options[i].remove();
-                        break;
+                        break; // No need to loop further
                     }
                 }
                 self.selectedArticles.push(articleToAdd);
