@@ -79,13 +79,13 @@ public class GoToAuctionDetails extends HttpServlet {
 			auctionOffers = offerDAO.getOffers(auctionId);
 
 			if(!auctionOffers.isEmpty()){
-				awardedUser = userDAO.getUser(auctionOffers.get(0).getFirst().getUser());
+				awardedUser = userDAO.getWinningUser(auctionId);
 				if(awardedUser != null){
 					// Removes the password from the object for security purposes
 					awardedUser.setPassword("");
 					awardedUser.setUser_id(0);
+					auctionDetailsInfo.addOfferWinner(auctionOffers,awardedUser);
 				}
-				auctionDetailsInfo.addOfferWinner(auctionOffers,awardedUser);
 			}
 
 			auctionDetailsInfo.transformImages(); //This method is used to transform the images from byte[] to base64
