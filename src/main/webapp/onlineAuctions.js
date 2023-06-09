@@ -12,49 +12,22 @@
 
     pageOrchestrator = new PageOrchestrator();
 
-    function saveUserMap(userMap) {
-        const serializedMap = JSON.stringify(Array.from(userMap.entries()));
-        localStorage.setItem('userMap', serializedMap);
-    }
-
-    function loadUserMap() {
-        const serializedMap = localStorage.getItem('userMap');
-        if (serializedMap) {
-            const userMapEntries = JSON.parse(serializedMap);
-            return new Map(userMapEntries);
-        }
-        return new Map();
-    }
-
     window.addEventListener("load", () => {
         let username = sessionStorage.getItem('username');
-        if (username === null) {
+        if(username === null) {
             window.location.href = "index.html";
         } else {
             pageOrchestrator.start();
-
-            let userMap = loadUserMap();
-            let myMap = userMap.get(username);
-
-            if (!myMap) {
-                myMap = new Map();
-                userMap.set(username, myMap);
-            }else {
-                myMap = new Map(Object.entries(myMap)); // Convert to Map
-            }
-
-            let hasLoggedBefore = myMap.get('hasLoggedBefore');
-            if (hasLoggedBefore) {
-                if (myMap.get('lastActionWasCreateAuction') === "true") {
+            let hasLoggedBefore = localStorage.getItem(username + 'hasLoggedBefore');
+            if(hasLoggedBefore) {
+                if (localStorage.getItem(username + 'lastActionWasCreateAuction') === "true") {
                     pageOrchestrator.renderSell();
                 } else {
                     pageOrchestrator.renderSpecialPurchase();
                 }
-
-                let lastVisitedAuctions = myMap.get('visitedAuctions');
+                let lastVisitedAuctions = localStorage.getItem(username + 'visitedAuctions');
                 let lVA = new Map();
-
-                // Deletes all the auctions visited more than 30 days ago
+                //Deletes all the auctions visited more than 30 days ago
                 if (lastVisitedAuctions != null) {
                     lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
                     for (let [key, value] of lVA.entries()) {
@@ -63,21 +36,19 @@
                             lVA.delete(key);
                         }
                     }
-                    myMap.set('visitedAuctions', JSON.stringify(Array.from(lVA.entries())));
-                    userMap.set(username, myMap);
-                    saveUserMap(userMap); // Salva la mappa aggiornata nel localStorage
+                    if(lVA.size > 0)
+                        localStorage.setItem(username + 'visitedAuctions', JSON.stringify(Array.from(lVA.entries())));
                 }
-            } else {
-                myMap.set('hasLoggedBefore', "true");
-                myMap.set('visitedAuctions', JSON.stringify(new Map()));
-                myMap.set('lastActionWasCreateAuction', "false");
-                userMap.set(username, myMap);
-                saveUserMap(userMap); // Salva la mappa aggiornata nel localStorage
+            }
+            else{
+                localStorage.setItem(username + 'hasLoggedBefore', "true");
+                let visitedAuctions = new Map();
+                localStorage.setItem(username + 'visitedAuctions', JSON.stringify(visitedAuctions));
+                localStorage.setItem(username + 'lastActionWasCreateAuction', "false");
                 pageOrchestrator.renderPurchase();
             }
         }
     }, false);
-
 
     function DiffDate(days, hours, minutes){
         this.days = days;
@@ -85,6 +56,7 @@
         this.minutes = minutes;
     }
 
+    // to transform an array of bytes in a base64 string
     function encodeBase64FromArray(array) {
         let binary = '';
         for (let i = 0; i < array.length; i++) {
@@ -241,9 +213,10 @@
         this.specialShow = function() {
             let self = this;
             self.searchedAuctionContainer = new SearchedAuctionContainer(this.searchedAuctionsContainerDiv);
-            let lastVisitedAuctions = localStorage.getItem('visitedAuctions');
+            let username = window.sessionStorage.getItem('username');
+            let lastVisitedAuctions = localStorage.getItem(username +'visitedAuctions');
             let lVA = new Map();
-            if (lastVisitedAuctions != null && lVA.size !== 0) {
+            if (lastVisitedAuctions != null && lastVisitedAuctions.length !== 0) {
                 lVA = new Map(Object.entries(JSON.parse(lastVisitedAuctions)));
 
                 // Convert the values of lVA map to an array of integers
@@ -268,7 +241,6 @@
                     });
             }
         };
-
 
 
 
@@ -328,28 +300,20 @@
             auctionList.forEach((aucFullInfo) => {
                 let anchor, table, thead, tbody, hrow, namehead, codehead, pricehead, par;
                 anchor = document.createElement("a");
-                anchor.addEventListener("click", function(event) {
+                anchor.addEventListener("click", function(event){
                     event.preventDefault();
                     pageOrchestrator.renderOffers(aucFullInfo.auction.auction_id);
-
-                    let userMap = loadUserMap();
-                    let username = sessionStorage.getItem('username');
-
-                    if (username && userMap.has(username)) {
-                        let myMap = userMap.get(username);
-                        myMap = new Map(Object.entries(myMap));
-
-                        if (!myMap.has('visitedAuctions')) {
-                            myMap = new Map(Object.entries(myMap));
-                            myMap.set('visitedAuctions', new Map());
-                        }
-
-                        let visitedAuctions = myMap.get('visitedAuctions');
-                        visitedAuctions.set(aucFullInfo.auction.auction_id, new Date());
-
-                        userMap.set(username, myMap);
-                        saveUserMap(userMap); // Save the updated user map in localStorage
+                    let map = new Map();
+                    let username = window.sessionStorage.getItem('username');
+                    const storedAuctions = localStorage.getItem(username +'visitedAuctions');
+                    if (storedAuctions) {
+                        const parsedAuctions = JSON.parse(storedAuctions);
+                        const entries = Object.entries(parsedAuctions);
+                        map = new Map(entries);
                     }
+                    if(aucFullInfo.auction.auctionId != null)
+                        map.set(aucFullInfo.auction.auctionId, new Date());
+                    localStorage.setItem(username + 'visitedAuctions', JSON.stringify(Object.fromEntries(map)));
                 });
                 table = document.createElement("table");
                 thead = document.createElement("thead");
@@ -665,16 +629,8 @@
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
-                                    let userMap = loadUserMap();
-                                    let username = sessionStorage.getItem('username');
-
-                                    if (username && userMap.has(username)) {
-                                        let myMap = userMap.get(username);
-                                        myMap = new Map(Object.entries(myMap));
-                                        myMap.set('lastActionWasCreateAuction', "false");
-                                        userMap.set(username, myMap);
-                                        saveUserMap(userMap); // Save the updated user map in localStorage
-                                    }
+                                    let username = sessionStorage.getItem("username");
+                                    localStorage.setItem(username + "lastActionWasCreateAuction", "false");
                                     self.createAuctionWizard.show();
                                 } else if (req.status === 403) {
                                     logout();
@@ -840,16 +796,8 @@
                             if (req.readyState === 4) {
                                 let message = req.responseText;
                                 if (req.status === 200) {
-                                    let userMap = loadUserMap();
-                                    let username = sessionStorage.getItem('username');
-
-                                    if (username && userMap.has(username)) {
-                                        let myMap = userMap.get(username);
-                                        myMap = new Map(Object.entries(myMap));
-                                        myMap.set('lastActionWasCreateAuction', "true");
-                                        userMap.set(username, myMap);
-                                        saveUserMap(userMap); // Save the updated user map in localStorage
-                                    }
+                                    let username = sessionStorage.getItem("username");
+                                    localStorage.setItem(username + "lastActionWasCreateAuction", "true");
                                     self.availableArticles = [];
                                     self.selectedArticles = [];
                                     self.show();
@@ -1274,16 +1222,8 @@
             offerPage.reset();
             auctionDetailsPage.reset();
 
-            let userMap = loadUserMap();
-            let username = sessionStorage.getItem('username');
-
-            if (username && userMap.has(username)) {
-                let myMap = userMap.get(username);
-                myMap = new Map(Object.entries(myMap));
-                myMap.set('lastActionWasCreateAuction', "false");
-                userMap.set(username, myMap);
-                saveUserMap(userMap); // Save the updated user map in localStorage
-            }
+            let username = sessionStorage.getItem("username");
+            localStorage.setItem(username + 'lastActionWasCreateAuction', 'false');
         };
 
         this.renderPurchase = function(){
@@ -1294,16 +1234,8 @@
             offerPage.reset()
             auctionDetailsPage.reset();
 
-            let userMap = loadUserMap();
-            let username = sessionStorage.getItem('username');
-
-            if (username && userMap.has(username)) {
-                let myMap = userMap.get(username);
-                myMap = new Map(Object.entries(myMap));
-                myMap.set('lastActionWasCreateAuction', "false");
-                userMap.set(username, myMap);
-                saveUserMap(userMap); // Save the updated user map in localStorage
-            }
+            let username = sessionStorage.getItem("username");
+            localStorage.setItem(username + 'lastActionWasCreateAuction', 'false');
         };
 
         this.renderSell = function(){
@@ -1324,29 +1256,17 @@
             offerPage.show(auctionId);
             auctionDetailsPage.reset();
 
-            let userMap = loadUserMap();
-            let username = sessionStorage.getItem('username');
-
-            if (username && userMap.has(username)) {
-                let myMap = userMap.get(username);
-                myMap = new Map(Object.entries(myMap));
-
-                if (!myMap.has('visitedAuctions')) {
-                    myMap.set('visitedAuctions', new Map());
-                }
-
-                let visitedAuctions = myMap.get('visitedAuctions');
-                visitedAuctions.set(auctionId, new Date());
-
-                if(!myMap.has('lastActionWasCreateAuction')){
-                    myMap.set('lastActionWasCreateAuction', "false");
-                }
-
-                userMap.set(username, myMap);
-                saveUserMap(userMap); // Save the updated user map in localStorage
+            let username = sessionStorage.getItem("username");
+            localStorage.setItem(username + 'lastActionWasCreateAuction', 'false');
+            let map = new Map();
+            const storedAuctions = localStorage.getItem(username + 'visitedAuctions');
+            if (storedAuctions) {
+                const parsedAuctions = JSON.parse(storedAuctions);
+                const entries = Object.entries(parsedAuctions);
+                map = new Map(entries);
             }
             map.set(auctionId, new Date());
-            localStorage.setItem('visitedAuctions', JSON.stringify(Object.fromEntries(map)));
+            localStorage.setItem(username + 'visitedAuctions', JSON.stringify(Object.fromEntries(map)));
         }
 
         this.renderAuctionDetails = function(auctionId){
@@ -1357,27 +1277,17 @@
             offerPage.reset();
             auctionDetailsPage.show(auctionId);
 
-            let userMap = loadUserMap();
-            let username = sessionStorage.getItem('username');
-
-            if (username && userMap.has(username)) {
-                let myMap = userMap.get(username);
-                myMap = new Map(Object.entries(myMap));
-
-                if (!myMap.has('visitedAuctions')) {
-                    myMap.set('visitedAuctions', new Map());
-                }
-
-                let visitedAuctions = myMap.get('visitedAuctions');
-                visitedAuctions.set(auctionId, new Date());
-
-                if(!myMap.has('lastActionWasCreateAuction')){
-                    myMap.set('lastActionWasCreateAuction', "false");
-                }
-
-                userMap.set(username, myMap);
-                saveUserMap(userMap); // Save the updated user map in localStorage
+            let username = sessionStorage.getItem("username");
+            localStorage.setItem(username + 'lastActionWasCreateAuction', 'false');
+            let map = new Map();
+            const storedAuctions = localStorage.getItem(username + 'visitedAuctions');
+            if (storedAuctions) {
+                const parsedAuctions = JSON.parse(storedAuctions);
+                const entries = Object.entries(parsedAuctions);
+                map = new Map(entries);
             }
+            map.set(auctionId, new Date());
+            localStorage.setItem(username + 'visitedAuctions', JSON.stringify(Object.fromEntries(map)));
         }
 
         this.renderSpecialPurchase = function(){
@@ -1388,16 +1298,8 @@
             auctionDetailsPage.reset();
 
             purchasePage.specialShow();
-            let userMap = loadUserMap();
-            let username = sessionStorage.getItem('username');
-
-            if (username && userMap.has(username)) {
-                let myMap = userMap.get(username);
-                myMap = new Map(Object.entries(myMap));
-                myMap.set('lastActionWasCreateAuction', "false");
-                userMap.set(username, myMap);
-                saveUserMap(userMap); // Save the updated user map in localStorage
-            }
+            let username = sessionStorage.getItem("username");
+            localStorage.setItem(username + 'lastActionWasCreateAuction', 'false');
         }
     }
 }
