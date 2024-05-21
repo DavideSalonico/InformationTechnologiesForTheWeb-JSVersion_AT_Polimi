@@ -7,7 +7,7 @@ Web Application to manage online auctions
 ## Team 👥
 
 - [Jaskaran Ram](https://github.com/JaskaranRam)
-- [Davide Salonico](https://github.com/LorenzoReitani)
+- [Lorenzo Reitani](https://github.com/LorenzoReitani)
 
 ## Features ✨
 
